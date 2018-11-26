@@ -1,10 +1,8 @@
 colour_list {
-	colour red {
-	}
-
-	colour green {
-	}
-
-	colour blue {
-	}
+	colour red     { r = 255 g = 0   b = 0   }
+	colour yellow  { r = 255 g = 255 b = 0   }
+	colour green   { r = 0   g = 255 b = 0   }
+	colour cyan    { r = 0   g = 255 b = 255 }
+	colour blue    { r = 0   g = 0   b = 255 }
+	colour magenta { r = 255 g = 0   b = 255 }
 }

@@ -22,11 +22,11 @@ namespace cgon {
 		}
 
 		std::string value() const { return _value; }
-		size_t line() const { return _line; }
-		size_t column() const { return _column; }
+		int line() const { return _line; }
 
 		std::string to_string() const {
-			return std::string("'") + value() + "' at " + std::to_string(line()) + ":" + std::to_string(column());
+			std::string position = std::to_string(_line) + ":" + std::to_string(_column);
+			return std::string("'") + value() + "' at " + position;
 		}
 
 	private:
@@ -35,6 +35,29 @@ namespace cgon {
 	};
 
 	typedef std::vector<token>::iterator token_iterator;
+
+	std::string token_get_line(token_iterator iter) {
+		token_iterator lower = iter, upper = iter;
+		while(lower->line() == iter->line()) {
+			lower--;
+		}
+		while(upper->line() == iter->line()) {
+			upper++;
+		}
+			
+		std::string result;
+
+		for(token_iterator current = lower; current < upper; current++) {
+			if(current == iter) {
+				result += "\x1B[31m"; // Set the text colour to red.
+			}
+			result += current->value() + " ";
+			if(current == iter) {
+				result += "\033[0m"; // Restore the text colour.
+			}
+		}
+		return result;
+	} 
 }
 
 #endif

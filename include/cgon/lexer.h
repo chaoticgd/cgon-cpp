@@ -19,7 +19,6 @@ namespace cgon {
 	}
 
 	std::vector<token> tokenize(std::string_view text) {
-		
 		std::string_view current = text;
 
 		std::vector<token> tokens;

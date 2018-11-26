@@ -22,17 +22,17 @@ namespace cgon {
 		std::unique_ptr<T> read_string(std::string data) const {
 			
 			std::vector<token> tokens = tokenize(data);
-
-			token_iterator current = tokens.begin();
 			
+			token_iterator current = tokens.begin();
+
 			type_registrar<base_object> allowed_root_type;
 			allowed_root_type.add<T>(T::type_name());
 
-			base_object* generic_root = parse_object(allowed_root_type, current, tokens.end()).release();
+			base_object* generic_root = parse_object(current, tokens.end(), allowed_root_type).release();
 			std::unique_ptr<T> root(dynamic_cast<T*>(generic_root));
 
 			if(current != tokens.end()) {
-				throw parse_error("Junk after root object", *current);
+				throw parse_error("Junk after root object", current);
 			}
 
 			return root;
