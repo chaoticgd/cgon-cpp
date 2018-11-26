@@ -33,7 +33,7 @@ namespace cgon {
 		std::unique_ptr<base_object> result(allowed_child_types.get(type_name).create());
 
 		if((current++)->value() != "{") {
-			result->set_name(current->value());
+			result->set_name((current - 1)->value());
 
 			if((current++)->value() != "{") {
 				throw parse_error("Expected '{'", current - 1);

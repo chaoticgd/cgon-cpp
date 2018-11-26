@@ -12,6 +12,8 @@ public:
 	int green() { return _g.get(); }
 	int blue() { return _b.get(); }
 
+	std::string name() { return get_name(); }
+
 private:
 	cgon::value_property<int> _r, _g, _b;
 };
@@ -33,6 +35,6 @@ int main() {
 	colours = colours_schema.read_file("colours.cgon");
 
 	for(colour* c : colours->children_of_type<colour>()) {
-		std::cout << "Colour: " << c->red() << " " << c->green() << " " << c->blue() << std::endl;
+		std::cout << c->name() << ": " << c->red() << " " << c->green() << " " << c->blue() << std::endl;
 	}
 }
