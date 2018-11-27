@@ -1,6 +1,3 @@
-#ifndef _CGON_OBJECT_H
-#define _CGON_OBJECT_H
-
 /*
 	Copyright (c) 2018 chaoticgd
 
@@ -22,6 +19,9 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 */
+
+#ifndef _CGON_OBJECT_H
+#define _CGON_OBJECT_H
 
 #include <stdexcept>
 
