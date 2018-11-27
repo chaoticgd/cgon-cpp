@@ -88,7 +88,7 @@ namespace cgon {
 			} else {
 				std::unique_ptr<base_object> new_child(
 					parse_object<typename T::child_types::head,
-								 typename T::child_types::tail>(current, end));
+					             typename T::child_types::tail>(current, end));
 				result->append_child(new_child);
 			}
 
