@@ -31,10 +31,10 @@
 
 namespace cgon {
 
-	template <typename T_This>
+	template <typename T_this>
 	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end);
 
-	template <typename T_this, typename T_That, typename... T_rest>
+	template <typename T_this, typename T_that, typename... T_rest>
 	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end);
 
 	class parse_error : public std::runtime_error {
@@ -103,7 +103,7 @@ namespace cgon {
 		return result;
 	}
 
-	template <typename T_This>
+	template <typename T_this>
 	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end) {
 		throw parse_error("Invalid type name", current);
 	}
