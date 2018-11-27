@@ -25,42 +25,45 @@
 
 #include <type_traits>
 
-#include "type_registrar.h"
+#include "token.h"
 
 namespace cgon {
 	class base_object;
 
 	class base_property {
+		template <typename T>
+		friend std::unique_ptr<base_object> parse_object_of_type(token_iterator& current, token_iterator end);
 	public:
 		virtual ~base_property() {}
 
 		virtual std::string name() const { return ""; };
 		virtual bool is_ready() const { return false; }
 
-		// TODO: Clean this up.
-		virtual bool is_integral() { return false; }
-		virtual bool is_floating_point() { return false; }
-		virtual bool is_string() { return false; }
-		virtual type_registrar<base_object> get_type() { return type_registrar<base_object>(); };
+	protected:
+		virtual void parse(token_iterator& current, token_iterator end) {}
 	};
 
 	template <typename T>
 	class property : public base_property {
 	public:
-		bool is_integral() {
-			return std::is_integral<T>();
-		}
-
-		bool is_floating_point() {
-			return std::is_floating_point<T>();
-		}
-
-		bool is_string() {
-			return std::is_same<T, std::string>();
-		}
-
 		virtual T get() const {}
 		virtual void set(T value) {}
+
+	protected:
+		void parse(token_iterator& current, token_iterator end) {
+			if(std::is_integral<T>()) {
+				int number = std::stoi((current++)->value());
+				set(number);
+			} else if(std::is_floating_point<T>()) {
+				double number = std::stod((current++)->value());
+				set(number);
+			} else if(std::is_same<T, std::string>()) {
+				// ...
+				throw std::runtime_error("not yet implemented");
+			} else {
+				throw std::runtime_error("not yet implemented");
+			}
+		}
 	};
 }
 

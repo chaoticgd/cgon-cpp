@@ -30,6 +30,7 @@ public:
 	numbers() : a(this, "a"), b(this, "b"), c(this, "c"), d(this, "d") {}
 
 	static std::string type_name() { return "numbers"; }
+	using child_types = cgon::type_list<>;
 
 	cgon::value_property<int> a, b, c;
 	cgon::value_property<double> d;

@@ -26,19 +26,16 @@
 #include <stdexcept>
 
 #include "tree.h"
-#include "type_registrar.h"
 #include "property.h"
 
 namespace cgon {
 	class base_object : public tree_node<base_object> {
-		friend std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end, type_registrar<base_object> allowed_child_types);
+		template <typename T>
+		friend std::unique_ptr<base_object> parse_object_of_type(token_iterator& current, token_iterator end);
+		
 	public:
 
 		static std::string type_name();
-
-		type_registrar<base_object> allowed_child_types() const {
-			return _allowed_child_types;
-		}
 
 		void register_property(std::string name, base_property* property) {
 			_properties.emplace(name, property);
@@ -52,11 +49,6 @@ namespace cgon {
 
 		void set_name(std::string name) {
 			_name = name;
-		}
-
-		template <typename T>
-		void add_allowed_child_type(std::string name) {
-			_allowed_child_types.add<T>(name);
 		}
 
 		bool has_property(std::string name) {
@@ -94,18 +86,9 @@ namespace cgon {
 	private:
 		std::string _name;
 		std::map<std::string, base_property*> _properties;
-		type_registrar<base_object> _allowed_child_types;
 	};
 
 	class object : public virtual base_object {};
-	
-	template <typename T_child_type>
-	class allow_children_of_type : public virtual base_object {
-	public:
-		allow_children_of_type() {
-			add_allowed_child_type<T_child_type>(T_child_type::type_name());
-		}
-	};
 }
 
 #endif

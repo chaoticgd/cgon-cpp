@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cgon/document.h>
 #include <cgon/value_property.h>
+#include <cgon/type_list.h>
 
 class colour : public cgon::object {
 public:
@@ -13,19 +14,20 @@ public:
 	int blue() { return _b.get(); }
 
 	std::string name() { return get_name(); }
+	using child_types = cgon::type_list<>;
 
 private:
 	cgon::value_property<int> _r, _g, _b;
 };
 
 class colour_list
-	: public cgon::object,
-	  cgon::allow_children_of_type<colour> {
+	: public cgon::object {
 public:
 	colour_list() {
 	}
 
 	static std::string type_name() { return "colour_list"; }
+	using child_types = cgon::type_list<colour>;
 };
 
 int main() {

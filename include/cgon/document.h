@@ -47,10 +47,7 @@ namespace cgon {
 			
 			token_iterator current = tokens.begin();
 
-			type_registrar<base_object> allowed_root_type;
-			allowed_root_type.add<T>(T::type_name());
-
-			base_object* generic_root = parse_object(current, tokens.end(), allowed_root_type).release();
+			base_object* generic_root = parse_object_of_type<T>(current, tokens.end()).release();
 			std::unique_ptr<T> root(dynamic_cast<T*>(generic_root));
 
 			if(current != tokens.end()) {

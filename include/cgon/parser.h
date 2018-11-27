@@ -26,10 +26,16 @@
 #include <stdexcept>
 
 #include "token.h"
-#include "type_registrar.h"
 #include "object.h"
+#include "type_list.h"
 
 namespace cgon {
+
+	template <typename T_This>
+	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end);
+
+	template <typename T_this, typename T_That, typename... T_rest>
+	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end);
 
 	class parse_error : public std::runtime_error {
 	public:
@@ -44,15 +50,13 @@ namespace cgon {
 		std::string _message;
 	};
 
-	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end, type_registrar<base_object> allowed_child_types) {
+	template <typename T>
+	std::unique_ptr<base_object> parse_object_of_type(token_iterator& current, token_iterator end) {
 		
 		token_iterator type_name_iterator = current++;
 		std::string type_name = type_name_iterator->value();
-		if(!allowed_child_types.contains(type_name)) {
-			throw parse_error("Invalid type name", type_name_iterator);
-		}
 
-		std::unique_ptr<base_object> result(allowed_child_types.get(type_name).create());
+		std::unique_ptr<base_object> result = std::make_unique<T>();
 
 		if((current++)->value() != "{") {
 			result->set_name((current - 1)->value());
@@ -80,24 +84,11 @@ namespace cgon {
 
 				current++; // Skip over "=".
 
-				if(property->is_integral()) {
-					int number = std::stoi((current++)->value());
-					result->set_property<int>(property_name, number);
-				} else if(property->is_floating_point()) {
-					double number = std::stod((current++)->value());
-					result->set_property<double>(property_name, number);
-				} else if(property->is_string()) {
-					// ...
-					throw std::runtime_error("not yet implemented");
-				} else {
-					std::unique_ptr<base_object> property_value =
-						parse_object(current, end, property->get_type());
-					// uhhh....
-					throw std::runtime_error("not yet implemented");
-				}
+				property->parse(current, end);
 			} else {
-				std::unique_ptr<base_object> new_child =
-					std::move(parse_object(current, end, result->allowed_child_types()));
+				std::unique_ptr<base_object> new_child(
+					parse_object<typename T::child_types::head,
+								 typename T::child_types::tail>(current, end));
 				result->append_child(new_child);
 			}
 
@@ -110,6 +101,23 @@ namespace cgon {
 		}
 
 		return result;
+	}
+
+	template <typename T_This>
+	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end) {
+		throw parse_error("Invalid type name", current);
+	}
+
+	template <typename T_this, typename T_that, typename... T_rest>
+	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end) {
+		
+		if constexpr(!std::is_same<T_this, type_list_end>()) {
+			if(current->value() == T_this::type_name()) {
+				return parse_object_of_type<T_this>(current, end);
+			}
+		}
+
+		return parse_object<T_that, T_rest...>(current, end);
 	}
 }
 

@@ -55,14 +55,6 @@ namespace cgon {
 			_value = value;
 		}
 
-		type_registrar<base_object> get_type() {
-			type_registrar<base_object> result;
-			if constexpr (std::is_object<T>()) {
-				//result.add<T>();
-			}
-			return result;
-		}
-
 	private:
 		std::string _name;
 		bool _ready;
