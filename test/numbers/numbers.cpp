@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 
-#include <iostream>
 #include <cgon/document.h>
 #include <cgon/value_property.h>
 
