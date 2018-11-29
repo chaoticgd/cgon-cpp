@@ -34,13 +34,13 @@
 #include "token.h"
 
 namespace cgon {
-	std::tuple<std::string, std::string_view> consume(std::string_view text) {
+	static std::tuple<std::string, std::string_view> consume(std::string_view text) {
 		auto delimeter = std::find_if(text.begin(), text.end(), isspace);
 		size_t size = std::distance(text.begin(), delimeter);
 		return { static_cast<std::string>(text.substr(0, size)), text.substr(size) };
 	}
 
-	std::vector<token> tokenize(std::string_view text) {
+	static std::vector<token> tokenize(std::string_view text) {
 		std::string_view current = text;
 
 		std::vector<token> tokens;

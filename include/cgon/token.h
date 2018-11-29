@@ -58,7 +58,7 @@ namespace cgon {
 
 	typedef std::vector<token>::iterator token_iterator;
 
-	std::string token_get_line(token_iterator iter) {
+	static std::string token_get_line(token_iterator iter) {
 		token_iterator lower = iter, upper = iter;
 		while(lower->line() == iter->line()) {
 			lower--;
