@@ -20,8 +20,8 @@
 	SOFTWARE.
 */
 
-#ifndef _CGON_DOCUMENT_
-#define _CGON_DOCUMENT_
+#ifndef _CGON_DOCUMENT_SCHEMA_H
+#define _CGON_DOCUMENT_SCHEMA_H
 
 #include <string>
 #include <fstream>
