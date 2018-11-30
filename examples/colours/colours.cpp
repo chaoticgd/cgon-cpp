@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cgon/document.h>
+#include <cgon/document_schema.h>
 #include <cgon/value_property.h>
 #include <cgon/type_list.h>
 

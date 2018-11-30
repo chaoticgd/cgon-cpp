@@ -25,25 +25,34 @@
 #include <cgon/document_schema.h>
 #include <cgon/value_property.h>
 
-class numbers : public cgon::object {
+class c : public cgon::object {
 public:
-	numbers() : _a(this, "a"), _b(this, "b"), _c(this, "c"), _d(this, "d") {}
+	c() : _d(this, "d") {}
 
-	static std::string type_name() { return "numbers"; }
+	static std::string type_name() { return "c"; }
 	using child_types = cgon::type_list<>;
 
-	cgon::value_property<int> _a, _b, _c;
 	cgon::value_property<double> _d;
 };
 
-TEST(numbers, main) {
-	cgon::document_schema<numbers> colours_schema;
+class a : public cgon::object {
+public:
+	a() : _b(this, "b") {}
 
-	std::unique_ptr<numbers> root =
-		colours_schema.read_file("numbers/numbers.cgon");
+	static std::string type_name() { return "a"; }
+	using child_types = cgon::type_list<c>;
 
-	EXPECT_EQ(root->_a.get(), 1337);
-	EXPECT_EQ(root->_b.get(), 123456789);
-	EXPECT_EQ(root->_c.get(), -32);
-	EXPECT_DOUBLE_EQ(root->_d.get(), 42.42);
+	cgon::value_property<double> _b;
+};
+
+TEST(minified, main) {
+	cgon::document_schema<a> minified_schema;
+
+	std::unique_ptr<a> root =
+		minified_schema.read_file("minified/minified.cgon");
+
+	EXPECT_EQ(root->_b.get(), 1337);
+
+	c* child = root->children_of_type<c>()[0];	
+	EXPECT_EQ(child->_d.get(), 42);
 }

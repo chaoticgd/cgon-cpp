@@ -25,17 +25,31 @@
 
 #include <regex>
 #include <tuple>
-#include <cctype>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <string_view>
+#include <cctype>
 
 #include "token.h"
 
 namespace cgon {
+	static bool is_symbol(char c) {
+		const static std::string symbols = "{}[]=\"'@";
+		return std::find(symbols.begin(), symbols.end(), c) != symbols.end() || isspace(c);
+	}
+
 	static std::tuple<std::string, std::string_view> consume(std::string_view text) {
-		auto delimeter = std::find_if(text.begin(), text.end(), isspace);
+
+		char first = text[0];
+		
+		std::string_view::iterator delimeter;
+		if(is_symbol(first)) {
+			delimeter = text.begin() + 1;
+		} else {
+			delimeter = std::find_if(text.begin(), text.end(), is_symbol);
+		}
+
 		size_t size = std::distance(text.begin(), delimeter);
 		return { static_cast<std::string>(text.substr(0, size)), text.substr(size) };
 	}
@@ -44,8 +58,6 @@ namespace cgon {
 		std::string_view current = text;
 
 		std::vector<token> tokens;
-
-		const std::regex trivial("[^[ \t\n]]*");
 
 		while(current.size() > 0) {
 
