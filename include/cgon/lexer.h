@@ -36,58 +36,40 @@
 #include "token.h"
 
 namespace cgon {
-	static bool is_symbol(char c) {
-		const static std::string symbols = "{}[]=\"'@";
-		return std::find(symbols.begin(), symbols.end(), c) != symbols.end() || isspace(c);
-	}
 
-	static int find_indent_level(std::string_view text) {
-		std::string_view::iterator iter, last_token_pos;
-		for(iter = text.begin() - 1; *iter != '\n'; iter--) {
-			if(!isspace(*iter)) {
-				last_token_pos = iter;
+	static std::vector<token> tokenize(std::string_view text);
+	static std::tuple<std::string, std::string_view> consume(std::string_view text);
+
+	static bool is_symbol(char c);
+	static int find_indent_level(std::string_view text);
+	static std::string_view::iterator find_end_of_string(std::string_view text);
+	static std::string unindent_string(std::string text, int indent_level);
+	static std::string unescape_string(std::string token);
+
+	std::vector<token> tokenize(std::string_view text) {
+		std::string_view current = text;
+
+		std::vector<token> tokens;
+
+		while(current.size() > 0) {
+
+			// Remove unnecessary whitespace.
+			if(isspace(current[0])) {
+				auto new_position = std::find_if_not(current.begin(), current.end(), isspace);
+				current.remove_prefix(std::distance(current.begin(), new_position));
+				continue;
 			}
-		}
-		return std::distance(iter, last_token_pos) - 1;
-	}
 
-	static std::string_view::iterator find_end_of_string(std::string_view text) {
-		for(auto iter = text.begin() + 1; iter < text.end(); iter++) {
-			if(*iter == '\\') {
-				iter++;
-			} else if(*iter == *text.begin()) {
-				return ++iter;
-			}
-		}
+			const auto [ value, rest ] = consume(current);
+			current = rest;
 
-		return text.end();
-	}
-
-	static std::string unindent_string(std::string text, int indent_level) {
-		std::string result;
-
-		std::vector<std::string> lines;
-		boost::split(lines, text, boost::is_any_of("\n"));
-		for(std::string& line : lines) {
-			int characters_to_remove = 0;
-			for(int i = 0; i < indent_level; i++) {
-				if(line[i] == '\t') {
-					characters_to_remove++;
-				} else {
-					break;
-				}
-			}
-			result += line.substr(characters_to_remove) + '\n';
+			tokens.emplace_back(value, text.size() - current.size(), text);
 		}
 
-		return result.substr(0, result.size() - 1); // Remove the last '\n'.
+		return tokens;
 	}
 
-	static std::string unescape_string(std::string token) {
-		return token; // TODO: Handle escaped characters.
-	}
-
-	static std::tuple<std::string, std::string_view> consume(std::string_view text) {
+	std::tuple<std::string, std::string_view> consume(std::string_view text) {
 
 		char first = text[0];
 		bool is_string = first == '\'' || first == '\"';
@@ -119,27 +101,55 @@ namespace cgon {
 		return { token, text.substr(size) };
 	}
 
-	static std::vector<token> tokenize(std::string_view text) {
-		std::string_view current = text;
+	bool is_symbol(char c) {
+		const static std::string symbols = "{}[]=\"'@";
+		return std::find(symbols.begin(), symbols.end(), c) != symbols.end() || isspace(c);
+	}
 
-		std::vector<token> tokens;
-
-		while(current.size() > 0) {
-
-			// Remove unnecessary whitespace.
-			if(isspace(current[0])) {
-				auto new_position = std::find_if_not(current.begin(), current.end(), isspace);
-				current.remove_prefix(std::distance(current.begin(), new_position));
-				continue;
+	int find_indent_level(std::string_view text) {
+		std::string_view::iterator iter, last_token_pos;
+		for(iter = text.begin() - 1; *iter != '\n'; iter--) {
+			if(!isspace(*iter)) {
+				last_token_pos = iter;
 			}
+		}
+		return std::distance(iter, last_token_pos) - 1;
+	}
 
-			const auto [ value, rest ] = consume(current);
-			current = rest;
-
-			tokens.emplace_back(value, text.size() - current.size(), text);
+	std::string_view::iterator find_end_of_string(std::string_view text) {
+		for(auto iter = text.begin() + 1; iter < text.end(); iter++) {
+			if(*iter == '\\') {
+				iter++;
+			} else if(*iter == *text.begin()) {
+				return ++iter;
+			}
 		}
 
-		return tokens;
+		return text.end();
+	}
+
+	std::string unindent_string(std::string text, int indent_level) {
+		std::string result;
+
+		std::vector<std::string> lines;
+		boost::split(lines, text, boost::is_any_of("\n"));
+		for(std::string& line : lines) {
+			int characters_to_remove = 0;
+			for(int i = 0; i < indent_level; i++) {
+				if(line[i] == '\t') {
+					characters_to_remove++;
+				} else {
+					break;
+				}
+			}
+			result += line.substr(characters_to_remove) + '\n';
+		}
+
+		return result.substr(0, result.size() - 1); // Remove the last '\n'.
+	}
+
+	std::string unescape_string(std::string token) {
+		return token; // TODO: Handle escaped characters.
 	}
 }
 
