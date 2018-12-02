@@ -29,9 +29,9 @@
 #include "property.h"
 
 namespace cgon {
-	class base_object : public tree_node<base_object> {
+	class object : public tree_node<object> {
 		template <typename T>
-		friend std::unique_ptr<base_object> parse_object_of_type(token_iterator& current, token_iterator end);
+		friend std::unique_ptr<object> parse_object_of_type(token_iterator& current, token_iterator end);
 		
 	public:
 
@@ -87,8 +87,6 @@ namespace cgon {
 		std::string _name;
 		std::map<std::string, base_property*> _properties;
 	};
-
-	class object : public virtual base_object {};
 }
 
 #endif

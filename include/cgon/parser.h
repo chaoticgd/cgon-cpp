@@ -31,18 +31,18 @@
 namespace cgon {
 
 	template <typename T_this>
-	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end);
+	std::unique_ptr<object> parse_object(token_iterator& current, token_iterator end);
 
 	template <typename T_this, typename T_that, typename... T_rest>
-	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end);
+	std::unique_ptr<object> parse_object(token_iterator& current, token_iterator end);
 
 	template <typename T>
-	std::unique_ptr<base_object> parse_object_of_type(token_iterator& current, token_iterator end) {
+	std::unique_ptr<object> parse_object_of_type(token_iterator& current, token_iterator end) {
 		
 		token_iterator type_name_iterator = current++;
 		std::string type_name = type_name_iterator->value();
 
-		std::unique_ptr<base_object> result = std::make_unique<T>();
+		std::unique_ptr<object> result = std::make_unique<T>();
 
 		if((current++)->value() != "{") {
 			result->set_name((current - 1)->value());
@@ -72,7 +72,7 @@ namespace cgon {
 
 				property->parse(current, end);
 			} else {
-				std::unique_ptr<base_object> new_child(
+				std::unique_ptr<object> new_child(
 					parse_object<typename T::child_types::head,
 					             typename T::child_types::tail>(current, end));
 				result->append_child(new_child);
@@ -90,12 +90,12 @@ namespace cgon {
 	}
 
 	template <typename T_this>
-	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end) {
+	std::unique_ptr<object> parse_object(token_iterator& current, token_iterator end) {
 		throw parse_error("Invalid type name", current);
 	}
 
 	template <typename T_this, typename T_that, typename... T_rest>
-	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end) {
+	std::unique_ptr<object> parse_object(token_iterator& current, token_iterator end) {
 		
 		if constexpr(!std::is_same<T_this, type_list_end>()) {
 			if(current->value() == T_this::type_name()) {

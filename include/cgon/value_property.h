@@ -33,7 +33,7 @@ namespace cgon {
 	template <typename T>
 	class value_property : public property<T> {
 	public:
-		value_property(base_object* owner, std::string name)
+		value_property(object* owner, std::string name)
 			: _name(name), _ready(false) {
 			owner->register_property(name, this);
 		}

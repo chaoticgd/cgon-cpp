@@ -30,11 +30,11 @@
 #include "string_expression.h"
 
 namespace cgon {
-	class base_object;
+	class object;
 
 	class base_property {
 		template <typename T>
-		friend std::unique_ptr<base_object> parse_object_of_type(token_iterator& current, token_iterator end);
+		friend std::unique_ptr<object> parse_object_of_type(token_iterator& current, token_iterator end);
 	public:
 		virtual ~base_property() {}
 
