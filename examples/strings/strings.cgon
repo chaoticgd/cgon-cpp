@@ -1,0 +1,9 @@
+strings_example {
+	greeting = 'Hello World☺ '
+
+	multi_line = "
+		Hello World
+		Lorem Ipsum
+			This sentence is indented.
+	"
+}

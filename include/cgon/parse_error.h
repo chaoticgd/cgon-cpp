@@ -20,49 +20,26 @@
 	SOFTWARE.
 */
 
-#ifndef _CGON_PROPERTY_H
-#define _CGON_PROPERTY_H
+#ifndef _CGON_PARSE_ERROR_H
+#define _CGON_PARSE_ERROR_H
 
-#include <type_traits>
+#include <stdexcept>
+#include <string>
 
 #include "token.h"
-#include "arithmetic_expression.h"
-#include "string_expression.h"
 
 namespace cgon {
-	class base_object;
-
-	class base_property {
-		template <typename T>
-		friend std::unique_ptr<base_object> parse_object_of_type(token_iterator& current, token_iterator end);
+	class parse_error : public std::runtime_error {
 	public:
-		virtual ~base_property() {}
+		parse_error(const std::string& what, token_iterator where)
+			: std::runtime_error(what),
+			  _message(std::string(what) + ":\n\t" + token_get_line(where)) {}
 
-		virtual std::string name() const { return ""; };
-		virtual bool is_ready() const { return false; }
-
-	protected:
-		virtual void parse(token_iterator& current, token_iterator end) {}
-	};
-
-	template <typename T>
-	class property : public base_property {
-	public:
-		virtual T get() const {}
-		virtual void set(T value) {}
-
-	protected:
-		void parse(token_iterator& current, token_iterator end) {
-			if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
-				arithmetic_expression expression(current, end);
-				set(expression.value());
-			} else if constexpr(std::is_same<T, std::string>()) {
-				string_expression expression(current, end);
-				set(expression.value());
-			} else {
-				throw std::runtime_error("not yet implemented");
-			}
+		const char* what() const noexcept {
+			return _message.c_str();
 		}
+	private:
+		std::string _message;
 	};
 }
 

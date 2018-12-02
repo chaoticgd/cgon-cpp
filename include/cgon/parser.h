@@ -23,8 +23,7 @@
 #ifndef _CGON_PARSER_H
 #define _CGON_PARSER_H
 
-#include <stdexcept>
-
+#include "parse_error.h"
 #include "token.h"
 #include "object.h"
 #include "type_list.h"
@@ -36,19 +35,6 @@ namespace cgon {
 
 	template <typename T_this, typename T_that, typename... T_rest>
 	std::unique_ptr<base_object> parse_object(token_iterator& current, token_iterator end);
-
-	class parse_error : public std::runtime_error {
-	public:
-		parse_error(const std::string& what, token_iterator where)
-			: std::runtime_error(what),
-			  _message(std::string(what) + ":\n\t" + token_get_line(where)) {}
-
-		const char* what() const noexcept {
-			return _message.c_str();
-		}
-	private:
-		std::string _message;
-	};
 
 	template <typename T>
 	std::unique_ptr<base_object> parse_object_of_type(token_iterator& current, token_iterator end) {

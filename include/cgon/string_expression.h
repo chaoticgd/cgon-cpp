@@ -20,49 +20,29 @@
 	SOFTWARE.
 */
 
-#ifndef _CGON_PROPERTY_H
-#define _CGON_PROPERTY_H
+#ifndef _CGON_STRING_EXPRESSION_H
+#define _CGON_STRING_EXPRESSION_H
 
-#include <type_traits>
+#include <string>
 
 #include "token.h"
-#include "arithmetic_expression.h"
-#include "string_expression.h"
+#include "parse_error.h"
 
 namespace cgon {
-	class base_object;
-
-	class base_property {
-		template <typename T>
-		friend std::unique_ptr<base_object> parse_object_of_type(token_iterator& current, token_iterator end);
+	class string_expression {
 	public:
-		virtual ~base_property() {}
-
-		virtual std::string name() const { return ""; };
-		virtual bool is_ready() const { return false; }
-
-	protected:
-		virtual void parse(token_iterator& current, token_iterator end) {}
-	};
-
-	template <typename T>
-	class property : public base_property {
-	public:
-		virtual T get() const {}
-		virtual void set(T value) {}
-
-	protected:
-		void parse(token_iterator& current, token_iterator end) {
-			if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
-				arithmetic_expression expression(current, end);
-				set(expression.value());
-			} else if constexpr(std::is_same<T, std::string>()) {
-				string_expression expression(current, end);
-				set(expression.value());
-			} else {
-				throw std::runtime_error("not yet implemented");
+		string_expression(token_iterator& current, token_iterator end) {
+			std::string tokenValue = (current++)->value();
+			if(	(*(tokenValue.begin()) != '\'' || *(tokenValue.end() - 1) != '\'') &&
+				(*(tokenValue.begin()) != '\"' || *(tokenValue.end() - 1) != '\"')) {
+				throw parse_error("String expected", current - 1);
 			}
+			_value = tokenValue.substr(1, tokenValue.size() - 2);
 		}
+
+		std::string value() { return _value; }
+	private:
+		std::string _value;
 	};
 }
 
