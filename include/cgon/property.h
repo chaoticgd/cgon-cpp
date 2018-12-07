@@ -32,37 +32,18 @@
 namespace cgon {
 	class object;
 
-	class base_property {
-		template <typename T>
-		friend std::unique_ptr<object> parse_object_of_type(token_iterator& current, token_iterator end);
-	public:
-		virtual ~base_property() {}
+	template <typename T_name, typename T_type, typename T_owner,
+	          T_type(T_owner::*T_getter)(), void(T_owner::*T_setter)(T_type value)>
+	struct property {
+		template <typename T_owner_func, typename T>
+		friend void parse_property_of_type(T_owner_func* owner, token_iterator& current, token_iterator end);
 
-		virtual std::string name() const { return ""; };
-		virtual bool is_ready() const { return false; }
-
-	protected:
-		virtual void parse(token_iterator& current, token_iterator end) {}
-	};
-
-	template <typename T>
-	class property : public base_property {
-	public:
-		virtual T get() const {}
-		virtual void set(T value) {}
-
-	protected:
-		void parse(token_iterator& current, token_iterator end) {
-			if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
-				arithmetic_expression expression(current, end);
-				set(expression.value());
-			} else if constexpr(std::is_same<T, std::string>()) {
-				string_expression expression(current, end);
-				set(expression.value());
-			} else {
-				throw std::runtime_error("not yet implemented");
-			}
-		}
+		using name = T_name;
+		using type = T_type;
+		
+	private:
+		constexpr static T_type(T_owner::*_getter)() = T_getter;
+		constexpr static void(T_owner::*_setter)(T_type value) = T_setter;
 	};
 }
 

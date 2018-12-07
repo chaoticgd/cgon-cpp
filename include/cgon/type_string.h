@@ -20,6 +20,6 @@ namespace cgon {
 }
 
 template <typename T, T... T_characters>
-	constexpr cgon::type_string<T_characters...> operator""_cgon_s() { return{}; }
+constexpr cgon::type_string<T_characters...> operator""_cgon_s() { return{}; }
 
 #endif

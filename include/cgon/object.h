@@ -33,13 +33,12 @@ namespace cgon {
 		template <typename T>
 		friend std::unique_ptr<object> parse_object_of_type(token_iterator& current, token_iterator end);
 		
+		template <typename T_owner, typename T>
+		void parse_property_of_type(T_owner* owner, token_iterator& current, token_iterator end);
+
 	public:
 
 		static std::string type_name();
-
-		void register_property(std::string name, base_property* property) {
-			_properties.emplace(name, property);
-		}
 
 	protected:
 
@@ -51,41 +50,8 @@ namespace cgon {
 			_name = name;
 		}
 
-		bool has_property(std::string name) {
-			return _properties.find(name) != _properties.end();
-		}
-
-		template <typename T>
-		bool has_property_of_type(std::string name) {
-			return _properties.find(name) != _properties.end() &&
-			       dynamic_cast<T*>(_properties.at(name)) != nullptr;
-		}
-
-		base_property* get_property(std::string name) {
-			return _properties.at(name);
-		}
-
-		template <typename T>
-		property<T>* get_property_of_type(std::string name) {
-			base_property* result = _properties.at(name);
-			return dynamic_cast<property<T>*>(result);
-		}
-
-		template <typename T>
-		void set_property(std::string name, T value) {
-			get_property_of_type<T>(name)->set(value);
-		}
-
-		std::vector<base_property*> properties() {
-			std::vector<base_property*> result(_properties.size());
-			std::transform(_properties.begin(), _properties.end(), result.begin(),
-				[](const std::pair<std::string, base_property*>& elem) { return elem.second; });
-			return result;
-		}
-
 	private:
 		std::string _name;
-		std::map<std::string, base_property*> _properties;
 	};
 }
 

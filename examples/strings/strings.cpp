@@ -1,21 +1,25 @@
 #include <iostream>
 #include <cgon/document_schema.h>
-#include <cgon/value_property.h>
-#include <cgon/type_list.h>
 
 class strings_example : public cgon::object {
 public:
-	strings_example() : _greeting(this, "greeting"), _multi_line(this, "multi_line") {}
 
-	static std::string type_name() { return "strings_example"; }
+	std::string greeting() { return _greeting; }
+	void set_greeting(std::string greeting) { _greeting = greeting; }
+
+	std::string multi_line() { return _multi_line; }
+	void set_multi_line(std::string multi_line) { _multi_line = multi_line; }
+
+	using type_name = decltype("strings_example"_cgon_s);
 	using child_types = cgon::type_list<>;
-
-	std::string get_greeting() { return _greeting.get(); }
-	std::string get_multi_line() { return _multi_line.get(); }
+	using properties = cgon::type_list<
+		cgon::property<decltype("greeting"_cgon_s), std::string, strings_example, &strings_example::greeting, &strings_example::set_greeting>,
+		cgon::property<decltype("multi_line"_cgon_s), std::string, strings_example, &strings_example::multi_line, &strings_example::set_multi_line>
+	>;
 
 private:
-	cgon::value_property<std::string> _greeting;
-	cgon::value_property<std::string> _multi_line;
+	std::string _greeting;
+	std::string _multi_line;
 };
 
 int main() {
@@ -24,6 +28,6 @@ int main() {
 	std::unique_ptr<strings_example> strings =
 		strings_schema.read_file("strings.cgon");
 
-	std::cout << strings->get_greeting() << std::endl;
-	std::cout << strings->get_multi_line() << std::endl;
+	std::cout << strings->greeting() << std::endl;
+	std::cout << strings->multi_line() << std::endl;
 }

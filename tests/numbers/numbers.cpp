@@ -23,17 +23,34 @@
 #include "gtest/gtest.h"
 
 #include <cgon/document_schema.h>
-#include <cgon/value_property.h>
 
 class numbers : public cgon::object {
 public:
-	numbers() : _a(this, "a"), _b(this, "b"), _c(this, "c"), _d(this, "d") {}
 
-	static std::string type_name() { return "numbers"; }
+	int a() { return _a; }
+	void set_a(int a) { _a = a; }
+
+	int b() { return _b; }
+	void set_b(int b) { _b = b; }
+
+	int c() { return _c; }
+	void set_c(int c) { _c = c; }
+
+	double d() { return _d; }
+	void set_d(double d) { _d = d; }
+
+	using type_name = decltype("numbers"_cgon_s);
 	using child_types = cgon::type_list<>;
+	using properties = cgon::type_list<
+		cgon::property<decltype("a"_cgon_s), int, numbers, &numbers::a, &numbers::set_a>,
+		cgon::property<decltype("b"_cgon_s), int, numbers, &numbers::b, &numbers::set_b>,
+		cgon::property<decltype("c"_cgon_s), int, numbers, &numbers::c, &numbers::set_c>,
+		cgon::property<decltype("d"_cgon_s), double, numbers, &numbers::d, &numbers::set_d>
+	>;
 
-	cgon::value_property<int> _a, _b, _c;
-	cgon::value_property<double> _d;
+private:
+	int _a, _b, _c;
+	double _d;
 };
 
 TEST(numbers, main) {
@@ -42,8 +59,8 @@ TEST(numbers, main) {
 	std::unique_ptr<numbers> root =
 		colours_schema.read_file("numbers/numbers.cgon");
 
-	EXPECT_EQ(root->_a.get(), 1337);
-	EXPECT_EQ(root->_b.get(), 123456789);
-	EXPECT_EQ(root->_c.get(), -32);
-	EXPECT_DOUBLE_EQ(root->_d.get(), 42.42);
+	EXPECT_EQ(root->a(), 1337);
+	EXPECT_EQ(root->b(), 123456789);
+	EXPECT_EQ(root->c(), -32);
+	EXPECT_DOUBLE_EQ(root->d(), 42.42);
 }

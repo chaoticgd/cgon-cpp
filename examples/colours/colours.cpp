@@ -1,33 +1,40 @@
 #include <iostream>
 #include <cgon/document_schema.h>
-#include <cgon/value_property.h>
-#include <cgon/type_list.h>
 
 class colour : public cgon::object {
 public:
-	colour() : _r(this, "r"), _g(this, "g"), _b(this, "b") {}
 
-	static std::string type_name() { return "colour"; }
-	using child_types = cgon::type_list<>;
+	int red() { return _r; }
+	void set_red(int r) { _r = r; }
+	
+	int green() { return _g; }
+	void set_green(int g) { _g = g; }
 
-	int red() { return _r.get(); }
-	int green() { return _g.get(); }
-	int blue() { return _b.get(); }
+	int blue() { return _b; }
+	void set_blue(int b) { _b = b; }
 
 	std::string name() { return get_name(); }
 
+	using type_name = decltype("colour"_cgon_s);
+	using child_types = cgon::type_list<>;
+	using properties = cgon::type_list<
+		cgon::property<decltype("r"_cgon_s), int, colour, &colour::red, &colour::set_red>,
+		cgon::property<decltype("g"_cgon_s), int, colour, &colour::green, &colour::set_green>,
+		cgon::property<decltype("b"_cgon_s), int, colour, &colour::blue, &colour::set_blue>
+	>;
+
 private:
-	cgon::value_property<int> _r, _g, _b;
+	int _r, _g, _b;
 };
 
-class colour_list
-	: public cgon::object {
+class colour_list : public cgon::object {
 public:
 	colour_list() {
 	}
 
-	static std::string type_name() { return "colour_list"; }
+	using type_name = decltype("colour"_cgon_s);
 	using child_types = cgon::type_list<colour>;
+	using properties = cgon::type_list<>;
 };
 
 int main() {

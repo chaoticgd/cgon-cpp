@@ -23,26 +23,37 @@
 #include "gtest/gtest.h"
 
 #include <cgon/document_schema.h>
-#include <cgon/value_property.h>
 
 class c : public cgon::object {
 public:
-	c() : _d(this, "d") {}
 
-	static std::string type_name() { return "c"; }
+	int d() { return _d; }
+	void set_d(int d) { _d = d; }
+
+	using type_name = decltype("c"_cgon_s);
 	using child_types = cgon::type_list<>;
+	using properties = cgon::type_list<
+		cgon::property<decltype("d"_cgon_s), int, c, &c::d, &c::set_d>
+	>;
 
-	cgon::value_property<double> _d;
+private:
+	int _d;
 };
 
 class a : public cgon::object {
 public:
-	a() : _b(this, "b") {}
 
-	static std::string type_name() { return "a"; }
+	int b() { return _b; }
+	void set_b(int b) { _b = b; }
+
+	using type_name = decltype("a"_cgon_s);
 	using child_types = cgon::type_list<c>;
+	using properties = cgon::type_list<
+		cgon::property<decltype("b"_cgon_s), int, a, &a::b, &a::set_b>
+	>;
 
-	cgon::value_property<double> _b;
+private:
+	int _b;
 };
 
 TEST(minified, main) {
@@ -51,8 +62,8 @@ TEST(minified, main) {
 	std::unique_ptr<a> root =
 		minified_schema.read_file("minified/minified.cgon");
 
-	EXPECT_EQ(root->_b.get(), 1337);
+	EXPECT_EQ(root->b(), 1337);
 
 	c* child = root->children_of_type<c>()[0];	
-	EXPECT_EQ(child->_d.get(), 42);
+	EXPECT_EQ(child->d(), 42);
 }
