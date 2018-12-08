@@ -20,10 +20,10 @@
 	SOFTWARE.
 */
 
-#include <string>
-
 #ifndef _CGON_TYPE_LIST_H
 #define _CGON_TYPE_LIST_H
+
+#include <string>
 
 namespace cgon {
 	struct type_list_end {};

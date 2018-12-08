@@ -28,6 +28,7 @@
 #include "object.h"
 #include "type_list.h"
 #include "type_string.h"
+#include "container_traits.h"
 
 namespace cgon {
 
@@ -36,6 +37,9 @@ namespace cgon {
 
 	template <typename T_owner, typename T_head, typename T_tail>
 	void parse_property(T_owner* owner, token_iterator& current, token_iterator end);
+
+	template <typename T>
+	T parse_expression(token_iterator& current, token_iterator end);
 
 	template <typename T>
 	std::unique_ptr<object> parse_object_of_type(token_iterator& current, token_iterator end) {
@@ -92,28 +96,15 @@ namespace cgon {
 		throw parse_error("Invalid type name", current);
 	}
 
-	template <typename T_owner, typename T>
-	void parse_property_of_type(T_owner* owner, token_iterator& current, token_iterator end) {
-
-		current += 2; // Skip over property name and '='.
-
-		if constexpr(std::is_integral<typename T::type>() || std::is_floating_point<typename T::type>()) {
-			arithmetic_expression expression(current, end);
-			(owner->*T::_setter)(expression.value());
-		} else if constexpr(std::is_same<typename T::type, std::string>()) {
-			string_expression expression(current, end);
-			(owner->*T::_setter)(expression.value());
-		} else {
-			throw std::runtime_error("Not yet implemented");
-		}
-	}
-
 	template <typename T_owner, typename T_head, typename T_tail>
 	void parse_property(T_owner* owner, token_iterator& current, token_iterator end) {
 
 		if constexpr(!std::is_same<T_head, type_list_end>()) {
 			if(current->value() == get_string<typename T_head::name>::value()) {
-				parse_property_of_type<T_owner, T_head>(owner, current, end);
+				current += 2; // Skip over property name and '='.
+				typename T_head::type value =
+					parse_expression<typename T_head::type>(current, end);
+				(owner->*T_head::_setter)(value);
 				return;
 			}
 		}
@@ -125,6 +116,40 @@ namespace cgon {
 		}
 
 		throw parse_error("Invalid property", current);
+	}
+
+	template <typename T>
+	T parse_expression(token_iterator& current, token_iterator end) {
+
+		if constexpr(is_vector<T>::value) {
+			if((current++)->value() != "[") {
+				throw parse_error("Expected '['", current - 1);
+			}
+
+			T result;
+
+			while(current->value() != "]") {
+				typename T::value_type value =
+					parse_expression<typename T::value_type>(current, end);
+				result.push_back(value);
+			}
+
+			current++; // Skip over ']'.
+
+			return result;
+		}
+
+		if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
+			arithmetic_expression expression(current, end);
+			return expression.value();
+		}
+		
+		if constexpr(std::is_same<T, std::string>()) {
+			string_expression expression(current, end);
+			return expression.value();
+		}
+		
+		throw std::runtime_error("Not yet implemented");
 	}
 }
 

@@ -20,31 +20,15 @@
 	SOFTWARE.
 */
 
-#ifndef _CGON_PROPERTY_H
-#define _CGON_PROPERTY_H
+#ifndef _CGON_CONTAINER_TRAITS_H
+#define _CGON_CONTAINER_TRAITS_H
 
 #include <type_traits>
-
-#include "token.h"
-#include "arithmetic_expression.h"
-#include "string_expression.h"
+#include <vector>
 
 namespace cgon {
-	class object;
-
-	template <typename T_name, typename T_type, typename T_owner,
-	          T_type(T_owner::*T_getter)(), void(T_owner::*T_setter)(T_type value)>
-	struct property {
-			template <typename T_owner_func, typename T_head, typename T_tail>
-			friend void parse_property(T_owner_func* owner, token_iterator& current, token_iterator end);
-
-		using name = T_name;
-		using type = T_type;
-
-	private:
-		constexpr static T_type(T_owner::*_getter)() = T_getter;
-		constexpr static void(T_owner::*_setter)(T_type value) = T_setter;
-	};
+	template <typename T> struct is_vector { static bool const value = false; };
+	template <typename T> struct is_vector<std::vector<T>> { static bool const value = true; };
 }
 
 #endif
