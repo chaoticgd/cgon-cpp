@@ -33,16 +33,16 @@
 namespace cgon {
 
 	template <typename T_head, typename T_tail>
-	std::unique_ptr<object> parse_object(token_iterator& current, token_iterator end);
+	std::unique_ptr<object> parse_object(token_iterator& current);
 
 	template <typename T_owner, typename T_head, typename T_tail>
-	void parse_property(T_owner* owner, token_iterator& current, token_iterator end);
+	void parse_property(T_owner* owner, token_iterator& current);
 
 	template <typename T>
-	T parse_expression(token_iterator& current, token_iterator end);
+	T parse_expression(token_iterator& current);
 
 	template <typename T>
-	std::unique_ptr<object> parse_object_of_type(token_iterator& current, token_iterator end) {
+	std::unique_ptr<object> parse_object_of_type(token_iterator& current) {
 		
 		token_iterator type_name_iterator = current++;
 		std::string type_name = type_name_iterator->value();
@@ -57,53 +57,50 @@ namespace cgon {
 			}
 		}
 
-		while(current < end) {
-
-			if(current->value() == "}") {
-				current++;
-				break;
-			}
+		while(current->value() != "}") {
 
 			if((current + 1)->value() == "=") {
 				parse_property<T, typename T::properties::head,
-				                  typename T::properties::tail>(result.get(), current, end);
+				                  typename T::properties::tail>(result.get(), current);
 			} else {
 				std::unique_ptr<object> new_child(
 					parse_object<typename T::child_types::head,
-					             typename T::child_types::tail>(current, end));
+					             typename T::child_types::tail>(current));
 				result->append_child(new_child);
 			}
 
 		}
 
+		current++; // Skip over '}'.
+
 		return result;
 	}
 
 	template <typename T_head, typename T_tail>
-	std::unique_ptr<object> parse_object(token_iterator& current, token_iterator end) {
+	std::unique_ptr<object> parse_object(token_iterator& current) {
 		
 		if constexpr(!std::is_same<T_head, type_list_end>()) {
 			if(current->value() == get_string<typename T_head::type_name>::value()) {
-				return parse_object_of_type<T_head>(current, end);
+				return parse_object_of_type<T_head>(current);
 			}
 		}
 
 		if constexpr(!std::is_same<T_tail, type_list_end>()) {
 			return parse_object<typename T_tail::head,
-			                    typename T_tail::tail>(current, end);
+			                    typename T_tail::tail>(current);
 		}
 
 		throw parse_error("Invalid type name", current);
 	}
 
 	template <typename T_owner, typename T_head, typename T_tail>
-	void parse_property(T_owner* owner, token_iterator& current, token_iterator end) {
+	void parse_property(T_owner* owner, token_iterator& current) {
 
 		if constexpr(!std::is_same<T_head, type_list_end>()) {
 			if(current->value() == get_string<typename T_head::name>::value()) {
 				current += 2; // Skip over property name and '='.
 				typename T_head::type value =
-					parse_expression<typename T_head::type>(current, end);
+					parse_expression<typename T_head::type>(current);
 				(owner->*T_head::_setter)(value);
 				return;
 			}
@@ -111,7 +108,7 @@ namespace cgon {
 
 		if constexpr(!std::is_same<T_tail, type_list_end>()) {
 			parse_property<T_owner, typename T_tail::head,
-			                        typename T_tail::tail>(owner, current, end);
+			                        typename T_tail::tail>(owner, current);
 			return;
 		}
 
@@ -119,7 +116,7 @@ namespace cgon {
 	}
 
 	template <typename T>
-	T parse_expression(token_iterator& current, token_iterator end) {
+	T parse_expression(token_iterator& current) {
 
 		if constexpr(is_vector<T>::value) {
 			if((current++)->value() != "[") {
@@ -130,7 +127,7 @@ namespace cgon {
 
 			while(current->value() != "]") {
 				typename T::value_type value =
-					parse_expression<typename T::value_type>(current, end);
+					parse_expression<typename T::value_type>(current);
 				result.push_back(value);
 			}
 
@@ -140,12 +137,12 @@ namespace cgon {
 		}
 
 		if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
-			arithmetic_expression expression(current, end);
+			arithmetic_expression expression(current);
 			return expression.value();
 		}
 		
 		if constexpr(std::is_same<T, std::string>()) {
-			string_expression expression(current, end);
+			string_expression expression(current);
 			return expression.value();
 		}
 		

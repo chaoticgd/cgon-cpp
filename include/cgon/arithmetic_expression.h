@@ -28,7 +28,7 @@
 namespace cgon {
 	class arithmetic_expression {
 	public:
-		arithmetic_expression(token_iterator& current, token_iterator end)
+		arithmetic_expression(token_iterator& current)
 			: _value(std::stod((current++)->value())) {}
 
 		double value() { return _value; }

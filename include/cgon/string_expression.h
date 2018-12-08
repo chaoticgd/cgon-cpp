@@ -31,7 +31,7 @@
 namespace cgon {
 	class string_expression {
 	public:
-		string_expression(token_iterator& current, token_iterator end) {
+		string_expression(token_iterator& current) {
 			std::string tokenValue = (current++)->value();
 			if(	(*(tokenValue.begin()) != '\'' || *(tokenValue.end() - 1) != '\'') &&
 				(*(tokenValue.begin()) != '\"' || *(tokenValue.end() - 1) != '\"')) {
