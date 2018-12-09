@@ -25,10 +25,14 @@
 
 #include <type_traits>
 #include <vector>
+#include <optional>
 
 namespace cgon {
 	template <typename T> struct is_vector { static bool const value = false; };
 	template <typename T> struct is_vector<std::vector<T>> { static bool const value = true; };
+
+	template <typename T> struct is_optional { static bool const value = false; };
+	template <typename T> struct is_optional<std::optional<T>> { static bool const value = true; };
 }
 
 #endif

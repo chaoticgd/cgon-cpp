@@ -136,6 +136,10 @@ namespace cgon {
 			return result;
 		}
 
+		if constexpr(is_optional<T>::value) {
+			return parse_expression<typename T::value_type>(current);
+		}
+
 		if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
 			arithmetic_expression expression(current);
 			return expression.value();
