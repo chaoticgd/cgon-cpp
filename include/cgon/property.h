@@ -35,8 +35,8 @@ namespace cgon {
 	template <typename T_name, typename T_type, typename T_owner,
 	          T_type(T_owner::*T_getter)(), void(T_owner::*T_setter)(T_type value)>
 	struct property {
-			template <typename T_owner_func, typename T_head, typename T_tail>
-			friend void parse_property(T_owner_func* owner, token_iterator& current);
+		template <typename T_owner_func, typename T_properties, int T_index>
+		friend void parse_property(token_iterator& current, T_owner_func* owner);
 
 		using name = T_name;
 		using type = T_type;

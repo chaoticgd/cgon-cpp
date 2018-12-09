@@ -26,7 +26,6 @@
 #include "parse_error.h"
 #include "token.h"
 #include "object.h"
-#include "type_list.h"
 #include "type_string.h"
 #include "container_traits.h"
 #include "demangle.h"
@@ -36,8 +35,11 @@ namespace cgon {
 	template <typename T_child_types, int T_index>
 	std::unique_ptr<object> parse_object(token_iterator& current);
 
-	template <typename T_owner, typename T_head, typename T_tail>
-	void parse_property(T_owner* owner, token_iterator& current);
+	template <typename T>
+	std::unique_ptr<T> parse_object_of_type(token_iterator& current);
+
+	template <typename T_owner, typename T_properties, int T_index>
+	void parse_property(token_iterator& current, T_owner* owner);
 
 	template <typename T>
 	T parse_expression(token_iterator& current);
@@ -50,6 +52,24 @@ namespace cgon {
 
 	template <typename T_tuple, int T_index>
 	void parse_tuple_element(token_iterator& current, T_tuple& tuple);
+
+	template <typename T_child_types, int T_index>
+	std::unique_ptr<object> parse_object(token_iterator& current) {
+
+		if constexpr(T_index < std::tuple_size<T_child_types>::value) {
+
+			using child_type = typename
+				std::tuple_element<T_index, T_child_types>::type;
+
+			if(current->value() == get_string<typename child_type::type_name>::value()) {
+				return parse_object_of_type<child_type>(current);
+			}
+
+			return parse_object<T_child_types, T_index + 1>(current);
+		}
+
+		throw parse_error("Invalid type name", current);
+	}
 
 	template <typename T>
 	std::unique_ptr<T> parse_object_of_type(token_iterator& current) {
@@ -70,8 +90,7 @@ namespace cgon {
 		while(current->value() != "}") {
 
 			if((current + 1)->value() == "=") {
-				parse_property<T, typename T::properties::head,
-				                  typename T::properties::tail>(result.get(), current);
+				parse_property<T, typename T::properties, 0>(current, result.get());
 			} else {
 				std::unique_ptr<object> new_child(
 					parse_object<typename T::child_types, 0>(current));
@@ -85,48 +104,31 @@ namespace cgon {
 		return result;
 	}
 
-	template <typename T_child_types, int T_index>
-	std::unique_ptr<object> parse_object(token_iterator& current) {
+	template <typename T_owner, typename T_properties, int T_index>
+	void parse_property(token_iterator& current, T_owner* owner) {
 
-		if constexpr(T_index < std::tuple_size<T_child_types>::value) {
+		if constexpr(T_index < std::tuple_size<T_properties>::value) {
 
-			using child_type = typename std::tuple_element<T_index, T_child_types>::type;
-
-			if(current->value() == get_string<typename child_type::type_name>::value()) {
-				return parse_object_of_type<child_type>(current);
-			}
-
-			return parse_object<T_child_types, T_index + 1>(current);
-		}
-
-		throw parse_error("Invalid type name", current);
-	}
-
-	template <typename T_owner, typename T_head, typename T_tail>
-	void parse_property(T_owner* owner, token_iterator& current) {
-
-		if constexpr(!std::is_same<T_head, type_list_end>()) {
-			if(current->value() == get_string<typename T_head::name>::value()) {
+			using property = typename
+				std::tuple_element<T_index, T_properties>::type;
+			
+			if(current->value() == get_string<typename property::name>::value()) {
 				current += 2; // Skip over property name and '='.
-				typename T_head::type value =
-					parse_expression<typename T_head::type>(current);
-				(owner->*T_head::_setter)(value);
+				typename property::type value =
+					parse_expression<typename property::type>(current);
+				(owner->*property::_setter)(value);
 				return;
 			}
+
+			return parse_property<T_owner, T_properties, T_index + 1>(current, owner);
 		}
 
-		if constexpr(!std::is_same<T_tail, type_list_end>()) {
-			parse_property<T_owner, typename T_tail::head,
-			                        typename T_tail::tail>(owner, current);
-			return;
-		}
-
-		throw parse_error("Invalid property", current);
+		throw parse_error("Invalid property name", current);
 	}
 
 	template <typename T>
 	T parse_expression(token_iterator& current) {
-
+		
 		if constexpr(is_vector<T>::value) {
 			return parse_vector<typename T::value_type>(current);
 		}

@@ -15,7 +15,7 @@ public:
 
 	using type_name = decltype("lists"_cgon_s);
 	using child_types = std::tuple<>;
-	using properties = cgon::type_list<
+	using properties = std::tuple<
 		cgon::property<decltype("primes"_cgon_s), std::vector<int>,
 		               lists, &lists::get_primes, &lists::set_primes>,
 		cgon::property<decltype("multi_dimensional"_cgon_s), std::vector<std::vector<int>>,

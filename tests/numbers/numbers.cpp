@@ -41,7 +41,7 @@ public:
 
 	using type_name = decltype("numbers"_cgon_s);
 	using child_types = std::tuple<>;
-	using properties = cgon::type_list<
+	using properties = std::tuple<
 		cgon::property<decltype("a"_cgon_s), int, numbers, &numbers::a, &numbers::set_a>,
 		cgon::property<decltype("b"_cgon_s), int, numbers, &numbers::b, &numbers::set_b>,
 		cgon::property<decltype("c"_cgon_s), int, numbers, &numbers::c, &numbers::set_c>,
