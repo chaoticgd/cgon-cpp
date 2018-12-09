@@ -29,6 +29,7 @@
 #include "type_list.h"
 #include "type_string.h"
 #include "container_traits.h"
+#include "demangle.h"
 
 namespace cgon {
 
@@ -40,6 +41,15 @@ namespace cgon {
 
 	template <typename T>
 	T parse_expression(token_iterator& current);
+
+	template <typename T>
+	std::vector<T> parse_vector(token_iterator& current);
+
+	template <typename T>
+	T parse_tuple(token_iterator& current);
+
+	template <typename T_tuple, int T_index>
+	void parse_tuple_element(token_iterator& current, T_tuple& tuple);
 
 	template <typename T>
 	std::unique_ptr<T> parse_object_of_type(token_iterator& current) {
@@ -119,21 +129,11 @@ namespace cgon {
 	T parse_expression(token_iterator& current) {
 
 		if constexpr(is_vector<T>::value) {
-			if((current++)->value() != "[") {
-				throw parse_error("Expected '['", current - 1);
-			}
+			return parse_vector<typename T::value_type>(current);
+		}
 
-			T result;
-
-			while(current->value() != "]") {
-				typename T::value_type value =
-					parse_expression<typename T::value_type>(current);
-				result.push_back(value);
-			}
-
-			current++; // Skip over ']'.
-
-			return result;
+		if constexpr(is_tuple<T>::value) {
+			return parse_tuple<T>(current);
 		}
 
 		if constexpr(is_optional<T>::value) {
@@ -150,7 +150,54 @@ namespace cgon {
 			return expression.value();
 		}
 		
-		throw std::runtime_error("Not yet implemented");
+		throw parse_error(std::string("Invalid property type ") + demangle_name(typeid(T).name()), current);
+	}
+
+	template <typename T>
+	std::vector<T> parse_vector(token_iterator& current) {
+		if((current++)->value() != "[") {
+			throw parse_error("Expected '['", current - 1);
+		}
+
+		std::vector<T> result;
+
+		while(current->value() != "]") {
+			T value = parse_expression<T>(current);
+			result.push_back(value);
+		}
+
+		current++; // Skip over ']'.
+
+		return result;
+	}
+
+	template <typename T>
+	T parse_tuple(token_iterator& current) {
+		if((current++)->value() != "(") {
+			throw parse_error("Expected '('", current - 1);
+		}
+
+		T result;
+		parse_tuple_element<T, 0>(current, result);
+
+		current++; // Skip over ')'.
+
+		return result;
+	}
+
+	template <typename T_tuple, int T_index>
+	void parse_tuple_element(token_iterator& current, T_tuple& tuple) {
+
+		using element_type = typename
+			std::decay<decltype(std::get<T_index>(tuple))>::type;
+
+		std::get<T_index>(tuple) =
+			parse_expression<element_type>(current);
+
+		if constexpr(T_index + 1 < std::tuple_size<T_tuple>::value) {
+			parse_tuple_element<T_tuple, T_index + 1>(current, tuple);
+		}
+
 	}
 }
 

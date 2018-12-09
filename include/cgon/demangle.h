@@ -20,23 +20,39 @@
 	SOFTWARE.
 */
 
-#ifndef _CGON_CONTAINER_TRAITS_H
-#define _CGON_CONTAINER_TRAITS_H
+#ifndef _CGON_DEMANGLE_H
+#define _CGON_DEMANGLE_H
 
-#include <type_traits>
-#include <vector>
-#include <optional>
-#include <tuple>
+#include <string>
+
+#ifdef __GNUC__
+	#include <cxxabi.h>
+#endif
 
 namespace cgon {
-	template <typename T> struct is_vector { static bool const value = false; };
-	template <typename T> struct is_vector<std::vector<T>> { static bool const value = true; };
+	static std::string demangle_name(std::string mangled_name) {
+		#ifdef __GNUC__
+			const size_t length = 256;
+			std::string result;
+			result.resize(length);
+			int status;
 
-	template <typename T> struct is_optional { static bool const value = false; };
-	template <typename T> struct is_optional<std::optional<T>> { static bool const value = true; };
+			abi::__cxa_demangle(
+				mangled_name.c_str(),
+				result.data(),
+				const_cast<size_t*>(&length),
+				&status
+			);
 
-	template <typename T> struct is_tuple { static bool const value = false; };
-	template <typename... T> struct is_tuple<std::tuple<T...>> { static bool const value = true; };
+			if(status != 0) {
+				return mangled_name;
+			}
+
+			return result;
+		#else
+			return mangled_name;
+		#endif
+	}
 }
 
 #endif

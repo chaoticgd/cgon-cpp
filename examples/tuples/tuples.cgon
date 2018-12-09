@@ -1,0 +1,7 @@
+tuples_example {
+	users = [
+		("Alice" "car" 1982)
+		("Bob" "password1" 1992)
+		("Eve" "abc123" 1990)
+	]
+}
