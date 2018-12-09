@@ -20,31 +20,44 @@
 	SOFTWARE.
 */
 
-#ifndef _CGON_PARSE_ERROR_H
-#define _CGON_PARSE_ERROR_H
+#ifndef _CGON_PREPROCESSOR_H
+#define _CGON_PREPROCESSOR_H
 
-#include <stdexcept>
 #include <string>
+#include <vector>
+#include <tuple>
 
-#include "token.h"
+#include "parse_error.h"
 
 namespace cgon {
-	class parse_error : public std::runtime_error {
-	public:
-		parse_error(const std::string& what)
-			: std::runtime_error(what + "."),
-			  _message(what) {}
+	std::string strip_comments(std::string text);
+	bool find_next_comment(std::string& text, int& position, const char* pattern);
 
-		parse_error(const std::string& what, token_iterator where)
-			: std::runtime_error(what),
-			  _message(std::string(what) + ":\n\t" + where.get_line()) {}
+	std::string strip_comments(std::string text) {
+		
+		const std::vector<std::tuple<const char*, const char*, int>> comment_types {
+			{ "/*", "*/", 2 },
+			{ "//", "\n", 0 }
+		};
 
-		const char* what() const noexcept {
-			return _message.c_str();
+		for(auto comment_type : comment_types) {
+			int position = -1;
+			while(find_next_comment(text, position, std::get<0>(comment_type))) {
+				int end_position = text.find(std::get<1>(comment_type), position);
+				if(end_position == std::string::npos) {
+					throw parse_error("Unterminated comment");
+				}
+				text = text.substr(0, position) + text.substr(end_position + std::get<2>(comment_type));
+			}
 		}
-	private:
-		std::string _message;
-	};
+		
+		return text;
+	}
+
+	bool find_next_comment(std::string& text, int& position, const char* pattern) {
+		position = text.find(pattern);
+		return position != std::string::npos;
+	}
 }
 
 #endif

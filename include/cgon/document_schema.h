@@ -26,6 +26,7 @@
 #include <string>
 #include <fstream>
 
+#include "preprocessor.h"
 #include "lexer.h"
 #include "parser.h"
 #include "unexpected_eof_error.h"
@@ -34,7 +35,8 @@ namespace cgon {
 	template <typename T>
 	class document_schema {
 	public:
-		document_schema() {}
+		document_schema()
+			: _allow_comments(true) {}
 
 		std::unique_ptr<T> read_file(std::string file_path) const {
 			std::ifstream file(file_path);
@@ -44,6 +46,10 @@ namespace cgon {
 
 		std::unique_ptr<T> read_string(std::string data) const {
 			
+			if(_allow_comments) {
+				data = strip_comments(data);
+			}
+
 			std::vector<token> tokens = tokenize(data);
 			
 			token_iterator current(tokens.begin(), tokens.begin(), tokens.end());
@@ -61,6 +67,11 @@ namespace cgon {
 
 			return root;
 		}
+
+		void set_allow_comments(bool allow_comments) { _allow_comments = allow_comments; }
+
+	private:
+		bool _allow_comments;
 	};
 }
 
