@@ -19,7 +19,7 @@ public:
 	std::string name() { return get_name(); }
 
 	using type_name = decltype("colour"_cgon_s);
-	using child_types = cgon::type_list<>;
+	using child_types = std::tuple<>;
 	using properties = cgon::type_list<
 		cgon::property<decltype("r"_cgon_s), int, colour, &colour::get_red, &colour::set_red>,
 		cgon::property<decltype("g"_cgon_s), int, colour, &colour::get_green, &colour::set_green>,
@@ -38,7 +38,7 @@ public:
 	}
 
 	using type_name = decltype("colour"_cgon_s);
-	using child_types = cgon::type_list<colour>;
+	using child_types = std::tuple<colour>;
 	using properties = cgon::type_list<>;
 };
 

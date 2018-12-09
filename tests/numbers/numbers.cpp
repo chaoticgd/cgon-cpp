@@ -40,7 +40,7 @@ public:
 	void set_d(double d) { _d = d; }
 
 	using type_name = decltype("numbers"_cgon_s);
-	using child_types = cgon::type_list<>;
+	using child_types = std::tuple<>;
 	using properties = cgon::type_list<
 		cgon::property<decltype("a"_cgon_s), int, numbers, &numbers::a, &numbers::set_a>,
 		cgon::property<decltype("b"_cgon_s), int, numbers, &numbers::b, &numbers::set_b>,

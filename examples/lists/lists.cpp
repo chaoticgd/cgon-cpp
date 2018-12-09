@@ -14,7 +14,7 @@ public:
 	void set_strings(std::vector<std::string> s) { strings = s; }
 
 	using type_name = decltype("lists"_cgon_s);
-	using child_types = cgon::type_list<>;
+	using child_types = std::tuple<>;
 	using properties = cgon::type_list<
 		cgon::property<decltype("primes"_cgon_s), std::vector<int>,
 		               lists, &lists::get_primes, &lists::set_primes>,

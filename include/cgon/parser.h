@@ -33,7 +33,7 @@
 
 namespace cgon {
 
-	template <typename T_head, typename T_tail>
+	template <typename T_child_types, int T_index>
 	std::unique_ptr<object> parse_object(token_iterator& current);
 
 	template <typename T_owner, typename T_head, typename T_tail>
@@ -74,8 +74,7 @@ namespace cgon {
 				                  typename T::properties::tail>(result.get(), current);
 			} else {
 				std::unique_ptr<object> new_child(
-					parse_object<typename T::child_types::head,
-					             typename T::child_types::tail>(current));
+					parse_object<typename T::child_types, 0>(current));
 				result->append_child(new_child);
 			}
 
@@ -86,18 +85,18 @@ namespace cgon {
 		return result;
 	}
 
-	template <typename T_head, typename T_tail>
+	template <typename T_child_types, int T_index>
 	std::unique_ptr<object> parse_object(token_iterator& current) {
-		
-		if constexpr(!std::is_same<T_head, type_list_end>()) {
-			if(current->value() == get_string<typename T_head::type_name>::value()) {
-				return parse_object_of_type<T_head>(current);
-			}
-		}
 
-		if constexpr(!std::is_same<T_tail, type_list_end>()) {
-			return parse_object<typename T_tail::head,
-			                    typename T_tail::tail>(current);
+		if constexpr(T_index < std::tuple_size<T_child_types>::value) {
+
+			using child_type = typename std::tuple_element<T_index, T_child_types>::type;
+
+			if(current->value() == get_string<typename child_type::type_name>::value()) {
+				return parse_object_of_type<child_type>(current);
+			}
+
+			return parse_object<T_child_types, T_index + 1>(current);
 		}
 
 		throw parse_error("Invalid type name", current);

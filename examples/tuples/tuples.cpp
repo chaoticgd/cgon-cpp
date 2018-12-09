@@ -10,7 +10,7 @@ public:
 	void set_users(std::vector<user> u) { users = u; };
 	
 	using type_name = decltype("tuples_example"_cgon_s);
-	using child_types = cgon::type_list<>;
+	using child_types = std::tuple<>;
 	using properties = cgon::type_list<
 		cgon::property<decltype("users"_cgon_s), std::vector<user>,
 		               tuples_example, &tuples_example::get_users, &tuples_example::set_users>
