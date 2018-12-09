@@ -28,6 +28,7 @@
 
 #include "lexer.h"
 #include "parser.h"
+#include "unexpected_eof_error.h"
 
 namespace cgon {
 	template <typename T>
@@ -45,10 +46,14 @@ namespace cgon {
 			
 			std::vector<token> tokens = tokenize(data);
 			
-			token_iterator current = tokens.begin();
+			token_iterator current(tokens.begin(), tokens.begin(), tokens.end());
 
-			object* generic_root = parse_object_of_type<T>(current).release();
-			std::unique_ptr<T> root(dynamic_cast<T*>(generic_root));
+			std::unique_ptr<T> root;
+			try {
+				root.reset(parse_object_of_type<T>(current).release());
+			} catch(unexpected_end_of_file_error e) {
+				throw parse_error("Unexpected end of file", token_iterator(tokens.end() - 1, tokens.begin(), tokens.end()));
+			}
 
 			if(current != tokens.end()) {
 				throw parse_error("Junk after root object", current);

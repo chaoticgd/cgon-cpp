@@ -25,6 +25,10 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
+#include <stdexcept>
+
+#include "unexpected_eof_error.h"
 
 namespace cgon {
 	class token {
@@ -56,30 +60,86 @@ namespace cgon {
 		size_t _line, _column;
 	};
 
-	typedef std::vector<token>::iterator token_iterator;
+	typedef std::vector<token>::iterator base_token_iterator;
 
-	static std::string token_get_line(token_iterator iter) {
-		token_iterator lower = iter, upper = iter;
-		while(lower->line() == iter->line()) {
-			lower--;
-		}
-		while(upper->line() == iter->line()) {
-			upper++;
-		}
-			
-		std::string result;
+	class token_iterator : public base_token_iterator {
+	public:
+		token_iterator(base_token_iterator other, base_token_iterator begin, base_token_iterator end)
+			: base_token_iterator(other),
+			  _begin(begin),
+			  _end(end) {}
 
-		for(token_iterator current = lower; current < upper; current++) {
-			if(current == iter) {
-				result += "\x1B[31m"; // Set the text colour to red.
+		token_iterator& operator+=(const int rhs) {
+			base_token_iterator::operator+=(rhs);
+			return *this;
+		}
+
+		token_iterator operator+(const int rhs) {
+			auto result = base_token_iterator::operator+(rhs);
+			return token_iterator(result, _begin, _end);
+		}
+
+		token_iterator operator-(const int rhs) {
+			auto result = base_token_iterator::operator-(rhs);
+			return token_iterator(result, _begin, _end);
+		}
+
+		token_iterator& operator++() {
+			auto result = base_token_iterator::operator++();
+			return *this;
+		}
+
+		token_iterator operator++(int value) {
+			auto result = base_token_iterator::operator++(value);
+			return token_iterator(result, _begin, _end);
+		}
+
+		token& operator*() {
+			check_error();
+			return base_token_iterator::operator*();
+		}
+
+		token* operator->() {
+			check_error();
+			return base_token_iterator::operator->();
+		}
+
+		std::string get_line() {
+			token_iterator lower = *this, upper = *this;
+			while(lower->line() == (*this)->line() && lower != _begin) {
+				lower--;
 			}
-			result += current->value() + " ";
-			if(current == iter) {
-				result += "\033[0m"; // Restore the text colour.
+			lower++;
+			while(upper->line() == (*this)->line() && upper != _end - 1) {
+				upper++;
+			}
+				
+			std::string result;
+
+			for(token_iterator current = lower; current < upper; current++) {
+				if(current == *this) {
+					result += "\x1B[31m"; // Set the text colour to red.
+				}
+				result += current->value() + " ";
+				if(current == *this) {
+					result += "\033[0m"; // Restore the text colour.
+				}
+			}
+			return result;
+		}
+
+	private:
+
+		void check_error() {
+			base_token_iterator iter = *static_cast<base_token_iterator*>(this);
+			if(iter >= _end) {
+				throw unexpected_end_of_file_error();
 			}
 		}
-		return result;
-	} 
+
+		base_token_iterator _begin;
+		base_token_iterator _end;
+	};
 }
 
 #endif

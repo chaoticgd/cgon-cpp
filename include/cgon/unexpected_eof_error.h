@@ -20,35 +20,17 @@
 	SOFTWARE.
 */
 
-#ifndef _CGON_OBJECT_H
-#define _CGON_OBJECT_H
+#ifndef _CGON_UNEXPECTED_EOF_ERROR_H
+#define _CGON_UNEXPECTED_EOF_ERROR_H
 
 #include <stdexcept>
-
-#include "tree.h"
-#include "property.h"
+#include <string>
 
 namespace cgon {
-	class object : public tree_node<object> {
-		template <typename T>
-		friend std::unique_ptr<T> parse_object_of_type(token_iterator& current);
-		
+	class unexpected_end_of_file_error : public std::runtime_error {
 	public:
-
-		static std::string type_name();
-
-	protected:
-
-		std::string get_name() const {
-			return _name;
-		}
-
-		void set_name(std::string name) {
-			_name = name;
-		}
-
-	private:
-		std::string _name;
+		unexpected_end_of_file_error()
+			: std::runtime_error("Unexpected end of file.") {}
 	};
 }
 

@@ -33,7 +33,7 @@ namespace cgon {
 	public:
 		parse_error(const std::string& what, token_iterator where)
 			: std::runtime_error(what),
-			  _message(std::string(what) + ":\n\t" + token_get_line(where)) {}
+			  _message(std::string(what) + ":\n\t" + where.get_line()) {}
 
 		const char* what() const noexcept {
 			return _message.c_str();

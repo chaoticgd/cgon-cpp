@@ -42,7 +42,7 @@ namespace cgon {
 	T parse_expression(token_iterator& current);
 
 	template <typename T>
-	std::unique_ptr<object> parse_object_of_type(token_iterator& current) {
+	std::unique_ptr<T> parse_object_of_type(token_iterator& current) {
 		
 		token_iterator type_name_iterator = current++;
 		std::string type_name = type_name_iterator->value();
