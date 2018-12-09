@@ -188,8 +188,7 @@ namespace cgon {
 	template <typename T_tuple, int T_index>
 	void parse_tuple_element(token_iterator& current, T_tuple& tuple) {
 
-		using element_type = typename
-			std::decay<decltype(std::get<T_index>(tuple))>::type;
+		using element_type = typename std::tuple_element<T_index, T_tuple>::type;
 
 		std::get<T_index>(tuple) =
 			parse_expression<element_type>(current);
