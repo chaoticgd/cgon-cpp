@@ -32,13 +32,8 @@ namespace cgon {
 	class object : public tree_node<object> {
 		template <typename T>
 		friend std::unique_ptr<T> parse_object_of_type(token_iterator& current);
-		
-	public:
-
-		static std::string type_name();
 
 	protected:
-
 		std::string get_name() const {
 			return _name;
 		}
