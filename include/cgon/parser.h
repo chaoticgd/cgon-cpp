@@ -120,7 +120,8 @@ namespace cgon {
 				return;
 			}
 
-			return parse_property<T_owner, T_properties, T_index + 1>(current, owner);
+			parse_property<T_owner, T_properties, T_index + 1>(current, owner);
+			return;
 		}
 
 		throw parse_error("Invalid property name", current);
