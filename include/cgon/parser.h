@@ -41,6 +41,9 @@ namespace cgon {
 	template <typename T_owner, typename T_properties, int T_index>
 	void parse_property(token_iterator& current, T_owner* owner);
 
+	template <typename T_properties, int T_index>
+	void validate_properties(token_iterator& current, std::vector<std::string> property_names);
+
 	template <typename T>
 	T parse_expression(token_iterator& current);
 
@@ -113,6 +116,8 @@ namespace cgon {
 
 		}
 
+		validate_properties<typename T::properties, 0>(current, property_names);
+
 		current++; // Skip over '}'.
 
 		return result;
@@ -139,6 +144,27 @@ namespace cgon {
 		}
 
 		throw parse_error("Invalid property name", current);
+	}
+
+	template <typename T_properties, int T_index>
+	void validate_properties(token_iterator& current, std::vector<std::string> property_names) {
+
+		if constexpr(T_index < std::tuple_size<T_properties>::value) {
+
+			using property = typename
+				std::tuple_element<T_index, T_properties>::type;
+
+			std::string property_name =
+				get_string<typename property::name>::value();
+
+			if(std::find(property_names.begin(), property_names.end(),
+			             property_name) == property_names.end() &&
+			   !is_optional<typename property::type>::value) {
+				throw parse_error(std::string("Property '") + property_name + "' has not been defined", current);
+			}
+
+			validate_properties<T_properties, T_index + 1>(current, property_names);
+		}
 	}
 
 	template <typename T>
