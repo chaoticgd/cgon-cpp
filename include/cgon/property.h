@@ -26,8 +26,6 @@
 #include <type_traits>
 
 #include "token.h"
-#include "arithmetic_expression.h"
-#include "string_expression.h"
 
 namespace cgon {
 	class object;

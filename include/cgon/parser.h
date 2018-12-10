@@ -53,6 +53,11 @@ namespace cgon {
 	template <typename T_tuple, int T_index>
 	void parse_tuple_element(token_iterator& current, T_tuple& tuple);
 
+	template <typename T>
+	T parse_arithmetic_expression(token_iterator& current);
+
+	static std::string parse_string(token_iterator& current);
+
 	template <typename T_child_types, int T_index>
 	std::unique_ptr<object> parse_object(token_iterator& current) {
 
@@ -143,13 +148,11 @@ namespace cgon {
 		}
 
 		if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
-			arithmetic_expression expression(current);
-			return expression.value();
+			return parse_arithmetic_expression<T>(current);
 		}
 		
 		if constexpr(std::is_same<T, std::string>()) {
-			string_expression expression(current);
-			return expression.value();
+			return parse_string(current);
 		}
 		
 		throw parse_error(std::string("Invalid property type ") + demangle_name(typeid(T).name()), current);
@@ -199,6 +202,20 @@ namespace cgon {
 			parse_tuple_element<T_tuple, T_index + 1>(current, tuple);
 		}
 
+	}
+
+	template <typename T>
+	T parse_arithmetic_expression(token_iterator& current) {
+		return std::stod((current++)->value());
+	}
+
+	std::string parse_string(token_iterator& current) {
+		std::string token_value = (current++)->value();
+		if((*(token_value.begin()) != '\'' || *(token_value.end() - 1) != '\'') &&
+		   (*(token_value.begin()) != '\"' || *(token_value.end() - 1) != '\"')) {
+			throw parse_error("String expected", current - 1);
+		}
+		return token_value.substr(1, token_value.size() - 2);
 	}
 }
 
