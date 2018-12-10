@@ -30,8 +30,8 @@
 #include "parse_error.h"
 
 namespace cgon {
-	std::string strip_comments(std::string text);
-	bool find_next_comment(std::string& text, int& position, const char* pattern);
+	static std::string strip_comments(std::string text);
+	static bool find_next_comment(std::string& text, int& position, const char* pattern);
 
 	std::string strip_comments(std::string text) {
 		
