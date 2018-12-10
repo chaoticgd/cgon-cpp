@@ -171,7 +171,9 @@ namespace cgon {
 			result.push_back(value);
 		}
 
-		current++; // Skip over ']'.
+		if((current++)->value() != "]") {
+			throw parse_error("Expected ']'", current - 1);
+		}
 
 		return result;
 	}
@@ -185,7 +187,9 @@ namespace cgon {
 		T result;
 		parse_tuple_element<T, 0>(current, result);
 
-		current++; // Skip over ')'.
+		if((current++)->value() != ")") {
+			throw parse_error("Expected ')'", current - 1);
+		}
 
 		return result;
 	}
