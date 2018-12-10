@@ -89,7 +89,7 @@ namespace cgon {
 
 		while(current->value() != "}") {
 
-			if((current + 1)->value() == "=") {
+			if((current + 1)->value() == ":") {
 				parse_property<T, typename T::properties, 0>(current, result.get());
 			} else {
 				std::unique_ptr<object> new_child(
