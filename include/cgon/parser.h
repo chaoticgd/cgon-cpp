@@ -92,9 +92,18 @@ namespace cgon {
 			}
 		}
 
+		std::vector<std::string> property_names;
+
 		while(current->value() != "}") {
 
 			if((current + 1)->value() == ":") {
+				std::string property_name = current->value();
+				if(std::find(property_names.begin(), property_names.end(),
+				             property_name) != property_names.end()) {
+					throw parse_error("Multiple definitions of property", current);
+				} else {
+					property_names.push_back(property_name);
+				}
 				parse_property<T, typename T::properties, 0>(current, result.get());
 			} else {
 				std::unique_ptr<object> new_child(
