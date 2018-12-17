@@ -32,22 +32,24 @@
 namespace cgon {
 	static std::string demangle_name(std::string mangled_name) {
 		#ifdef __GNUC__
-			const size_t length = 256;
+			const size_t max_length = 256;
 			std::string result;
-			result.resize(length);
+			result.resize(max_length);
 			int status;
 
 			abi::__cxa_demangle(
 				mangled_name.c_str(),
 				result.data(),
-				const_cast<size_t*>(&length),
+				const_cast<size_t*>(&max_length),
 				&status
 			);
 
 			if(status != 0) {
 				return mangled_name;
 			}
-
+			
+			size_t length = std::distance(result.begin(), std::find(result.begin(), result.end(), '\0'));
+			result.resize(length);
 			return result;
 		#else
 			return mangled_name;
