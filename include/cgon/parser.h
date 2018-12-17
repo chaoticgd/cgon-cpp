@@ -111,7 +111,7 @@ namespace cgon {
 					property_names.push_back(property_name);
 				}
 				parse_property<T, typename T::properties, 0>(current, result.get());
-			} else {
+			} else if constexpr(std::tuple_size<typename T::child_types>::value > 0) {
 				std::unique_ptr<object> new_child(
 					parse_object<typename T::child_types, 0>(current));
 				result->append_child(new_child);
