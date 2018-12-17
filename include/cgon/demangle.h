@@ -47,9 +47,8 @@ namespace cgon {
 			if(status != 0) {
 				return mangled_name;
 			}
-			
-			size_t length = std::distance(result.begin(), std::find(result.begin(), result.end(), '\0'));
-			result.resize(length);
+
+			result.resize(result.find('\0'));
 			return result;
 		#else
 			return mangled_name;

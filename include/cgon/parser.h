@@ -48,7 +48,10 @@ namespace cgon {
 	T parse_expression(token_iterator& current);
 
 	template <typename T>
-	std::vector<T> parse_vector(token_iterator& current);
+	T parse_vector(token_iterator& current);
+	
+	template <typename T>
+	T parse_array(token_iterator& current);
 
 	template <typename T>
 	T parse_tuple(token_iterator& current);
@@ -170,16 +173,20 @@ namespace cgon {
 	template <typename T>
 	T parse_expression(token_iterator& current) {
 		
+		if constexpr(is_optional<T>::value) {
+			return parse_expression<typename T::value_type>(current);
+		}
+
 		if constexpr(is_vector<T>::value) {
-			return parse_vector<typename T::value_type>(current);
+			return parse_vector<T>(current);
+		}
+
+		if constexpr(is_array<T>::value) {
+			return parse_array<T>(current);
 		}
 
 		if constexpr(is_tuple<T>::value) {
 			return parse_tuple<T>(current);
-		}
-
-		if constexpr(is_optional<T>::value) {
-			return parse_expression<typename T::value_type>(current);
 		}
 
 		if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
@@ -194,16 +201,31 @@ namespace cgon {
 	}
 
 	template <typename T>
-	std::vector<T> parse_vector(token_iterator& current) {
+	T parse_vector(token_iterator& current) {
 		if((current++)->value() != "[") {
 			throw parse_error("Expected '['", current - 1);
 		}
 
-		std::vector<T> result;
-
+		T result;
 		while(current->value() != "]") {
-			T value = parse_expression<T>(current);
+			typename T::value_type value = parse_expression<typename T::value_type>(current);
 			result.push_back(value);
+		}
+
+		current++; // Skip over ']'.
+
+		return result;
+	}
+
+	template <typename T>
+	T parse_array(token_iterator& current) {
+		if((current++)->value() != "[") {
+			throw parse_error("Expected '['", current - 1);
+		}
+
+		T result;
+		for(typename T::value_type& element : result) {
+			element = parse_expression<typename T::value_type>(current);
 		}
 
 		if((current++)->value() != "]") {

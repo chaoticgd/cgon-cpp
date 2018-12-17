@@ -24,16 +24,20 @@
 #define _CGON_CONTAINER_TRAITS_H
 
 #include <type_traits>
-#include <vector>
 #include <optional>
+#include <vector>
+#include <array>
 #include <tuple>
 
 namespace cgon {
+	template <typename T> struct is_optional { static bool const value = false; };
+	template <typename T> struct is_optional<std::optional<T>> { static bool const value = true; };
+
 	template <typename T> struct is_vector { static bool const value = false; };
 	template <typename T> struct is_vector<std::vector<T>> { static bool const value = true; };
 
-	template <typename T> struct is_optional { static bool const value = false; };
-	template <typename T> struct is_optional<std::optional<T>> { static bool const value = true; };
+	template <typename T> struct is_array { static bool const value = false; };
+	template <typename T, std::size_t T_size> struct is_array<std::array<T, T_size>> { static bool const value = true; };
 
 	template <typename T> struct is_tuple { static bool const value = false; };
 	template <typename... T> struct is_tuple<std::tuple<T...>> { static bool const value = true; };
