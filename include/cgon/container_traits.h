@@ -30,17 +30,17 @@
 #include <tuple>
 
 namespace cgon {
-	template <typename T> struct is_optional { static bool const value = false; };
-	template <typename T> struct is_optional<std::optional<T>> { static bool const value = true; };
+	template <typename T> struct is_optional : std::false_type {};
+	template <typename T> struct is_optional<std::optional<T>> : std::true_type {};
 
-	template <typename T> struct is_vector { static bool const value = false; };
-	template <typename T> struct is_vector<std::vector<T>> { static bool const value = true; };
+	template <typename T> struct is_vector : std::false_type {};
+	template <typename T> struct is_vector<std::vector<T>> : std::true_type {};
 
-	template <typename T> struct is_array { static bool const value = false; };
-	template <typename T, std::size_t T_size> struct is_array<std::array<T, T_size>> { static bool const value = true; };
+	template <typename T> struct is_array : std::false_type {};
+	template <typename T, std::size_t T_size> struct is_array<std::array<T, T_size>> : std::true_type {};
 
-	template <typename T> struct is_tuple { static bool const value = false; };
-	template <typename... T> struct is_tuple<std::tuple<T...>> { static bool const value = true; };
+	template <typename T> struct is_tuple : std::false_type {};
+	template <typename... T> struct is_tuple<std::tuple<T...>> : std::true_type {};
 }
 
 #endif
