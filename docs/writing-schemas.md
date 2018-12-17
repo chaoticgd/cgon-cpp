@@ -60,6 +60,6 @@ public:
 };
 ```
 
-Each template parameter passed to the std::tuple in the third using declaration specifies a different property. The first template parameter that cgon::object takes specifies the name of the property, the second specifies the type. The third parameter must be equal to the type of the schema class for implementation-specific reasons. The last two parameters are pointers to member functions of the schema class: a getter and a setter respecitvely. The definitions of these getters/setters are omitted in the above section of code.
+Each template parameter passed to the std::tuple in the third using declaration specifies a different property. The first template parameter that cgon::property takes specifies the name of the property, the second specifies the type. The third parameter must be equal to the type of the schema class for implementation-specific reasons. The last two parameters are pointers to member functions of the schema class: a getter and a setter respecitvely. The definitions of these getters/setters are omitted in the above section of code.
 
 Properties can be of the following types: int (and variations thereof e.g. unsigned long), float, double, std::string, std::optional<T>, std::vector<T>, std::array<T, T_index>, std::tuple<T1, T2, ...> where T is any valid property type.
