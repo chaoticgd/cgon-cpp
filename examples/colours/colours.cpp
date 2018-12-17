@@ -34,9 +34,6 @@ private:
 
 class colour_list : public cgon::object {
 public:
-	colour_list() {
-	}
-
 	using type_name = decltype("colour"_cgon_s);
 	using child_types = std::tuple<colour>;
 	using properties = std::tuple<>;
