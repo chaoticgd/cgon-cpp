@@ -21,10 +21,14 @@ public:
 	using type_name = decltype("colour"_cgon_s);
 	using child_types = std::tuple<>;
 	using properties = std::tuple<
-		cgon::property<decltype("r"_cgon_s), int, colour, &colour::get_red, &colour::set_red>,
-		cgon::property<decltype("g"_cgon_s), int, colour, &colour::get_green, &colour::set_green>,
-		cgon::property<decltype("b"_cgon_s), int, colour, &colour::get_blue, &colour::set_blue>,
-		cgon::property<decltype("a"_cgon_s), std::optional<int>, colour, &colour::get_alpha, &colour::set_alpha>
+		cgon::property<decltype("r"_cgon_s), int,
+		               colour, &colour::get_red, &colour::set_red>,
+		cgon::property<decltype("g"_cgon_s), int,
+		               colour, &colour::get_green, &colour::set_green>,
+		cgon::property<decltype("b"_cgon_s), int,
+		               colour, &colour::get_blue, &colour::set_blue>,
+		cgon::property<decltype("a"_cgon_s), std::optional<int>,
+		               colour, &colour::get_alpha, &colour::set_alpha>
 	>;
 
 private:
