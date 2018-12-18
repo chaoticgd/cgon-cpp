@@ -197,7 +197,7 @@ namespace cgon {
 			return parse_string(current);
 		}
 		
-		throw parse_error(std::string("Invalid property type ") + demangle_name(typeid(T).name()), current);
+		return T(current);
 	}
 
 	template <typename T>
