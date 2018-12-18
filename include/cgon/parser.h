@@ -28,7 +28,6 @@
 #include "object.h"
 #include "type_string.h"
 #include "container_traits.h"
-#include "demangle.h"
 
 namespace cgon {
 
@@ -138,7 +137,7 @@ namespace cgon {
 				current += 2; // Skip over property name and '='.
 				typename property::type value =
 					parse_expression<typename property::type>(current);
-				(owner->*property::_setter)(value);
+				property::set(owner, value);
 				return;
 			}
 
@@ -175,29 +174,19 @@ namespace cgon {
 		
 		if constexpr(is_optional<T>::value) {
 			return parse_expression<typename T::value_type>(current);
-		}
-
-		if constexpr(is_vector<T>::value) {
+		} else if constexpr(is_vector<T>::value) {
 			return parse_vector<T>(current);
-		}
-
-		if constexpr(is_array<T>::value) {
+		} else if constexpr(is_array<T>::value) {
 			return parse_array<T>(current);
-		}
-
-		if constexpr(is_tuple<T>::value) {
+		} else if constexpr(is_tuple<T>::value) {
 			return parse_tuple<T>(current);
-		}
-
-		if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
+		} else if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
 			return parse_arithmetic_expression<T>(current);
-		}
-		
-		if constexpr(std::is_same<T, std::string>()) {
+		} else if constexpr(std::is_same<T, std::string>()) {
 			return parse_string(current);
+		} else {
+			return T(current);
 		}
-		
-		return T(current);
 	}
 
 	template <typename T>
