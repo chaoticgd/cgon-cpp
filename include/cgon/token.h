@@ -106,11 +106,11 @@ namespace cgon {
 
 		std::string get_line() {
 			token_iterator lower = *this, upper = *this;
-			while(lower->line() == (*this)->line() && lower != _begin) {
+			while(lower->line() > (*this)->line() - 2 && lower != _begin) {
 				lower--;
 			}
 			lower++;
-			while(upper->line() == (*this)->line() && upper != _end - 1) {
+			while(upper->line() < (*this)->line() + 2 && upper != _end - 1) {
 				upper++;
 			}
 				
@@ -123,6 +123,10 @@ namespace cgon {
 				result += current->value() + " ";
 				if(current == *this) {
 					result += "\033[0m"; // Restore the text colour.
+				}
+
+				if(current != upper && (current + 1)->line() != current->line()) {
+					result += "\n";
 				}
 			}
 			return result;
