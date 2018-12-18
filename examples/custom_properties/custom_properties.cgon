@@ -1,0 +1,19 @@
+transactions {
+	transaction {
+		id: AG-7292
+		price: 12 USD
+		date: 2017-04-02
+	}
+
+	transaction {
+		id: VF-3528
+		price: 33 GBP
+		date: 2018-11-20
+	}
+
+	transaction {
+		id: CK-0173
+		price: 0.02 BTC
+		date: 2018-12-07
+	}
+}
