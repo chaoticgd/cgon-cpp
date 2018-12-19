@@ -61,6 +61,8 @@ namespace cgon {
 	template <typename T>
 	T parse_arithmetic_expression(token_iterator& current);
 
+	static bool parse_bool(token_iterator& current);
+
 	static std::string parse_string(token_iterator& current);
 
 	template <typename T_child_types, int T_index>
@@ -180,6 +182,8 @@ namespace cgon {
 			return parse_array<T>(current);
 		} else if constexpr(is_tuple<T>::value) {
 			return parse_tuple<T>(current);
+		} else if constexpr(std::is_same<T, bool>()) {
+			return parse_bool(current);
 		} else if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
 			return parse_arithmetic_expression<T>(current);
 		} else if constexpr(std::is_same<T, std::string>()) {
@@ -256,7 +260,22 @@ namespace cgon {
 
 	template <typename T>
 	T parse_arithmetic_expression(token_iterator& current) {
-		return std::stod((current++)->copy_value());
+		try {
+			return std::stod((current++)->copy_value());
+		} catch(...) {
+			throw parse_error("Expected a number", current - 1);
+		}
+	}
+
+	bool parse_bool(token_iterator& current) {
+		std::string_view value = (current++)->value();
+		if(value == "false") {
+			return false;
+		} else if(value == "true") {
+			return true;
+		} else {
+			throw parse_error("Expected a boolean", current - 1);
+		}
 	}
 
 	std::string parse_string(token_iterator& current) {

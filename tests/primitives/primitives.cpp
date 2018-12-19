@@ -53,14 +53,33 @@ private:
 	double _d;
 };
 
-TEST(numbers, main) {
-	cgon::document_schema<numbers> colours_schema;
+struct booleans : public cgon::object {
+	bool a, b;
 
+	using type_name = decltype("booleans"_cgon_s);
+	using child_types = std::tuple<>;
+	using properties = std::tuple<
+		cgon::pointer_property<decltype("a"_cgon_s), bool, booleans, &booleans::a>,
+		cgon::pointer_property<decltype("b"_cgon_s), bool, booleans, &booleans::b>
+	>;
+};
+
+TEST(primitives, numbers) {
+	cgon::document_schema<numbers> schema;
 	std::unique_ptr<numbers> root =
-		colours_schema.read_file("numbers/numbers.cgon");
+		schema.read_file("primitives/numbers.cgon");
 
 	EXPECT_EQ(root->a(), 1337);
 	EXPECT_EQ(root->b(), 123456789);
 	EXPECT_EQ(root->c(), -32);
 	EXPECT_DOUBLE_EQ(root->d(), 42.42);
+}
+
+TEST(primitives, booleans) {
+	cgon::document_schema<booleans> schema;
+	std::unique_ptr<booleans> root =
+		schema.read_file("primitives/booleans.cgon");
+	
+	EXPECT_EQ(root->a, false);
+	EXPECT_EQ(root->b, true);
 }

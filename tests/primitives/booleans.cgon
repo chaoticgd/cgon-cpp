@@ -1,0 +1,4 @@
+booleans {
+	a: false
+	b: true
+}
