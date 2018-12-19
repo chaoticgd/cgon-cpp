@@ -123,6 +123,6 @@ int main() {
 	for(transaction* t : colours->children_of_type<transaction>()) {
 		std::cout << "Transaction " << t->id.to_string()
 		          << " with price " << t->price.to_string()
-				  << " on date " << t->date.to_string() << "\n";
+		          << " on date " << t->date.to_string() << "\n";
 	}
 }
