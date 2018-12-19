@@ -41,7 +41,7 @@ All of this would let dates be written in a CGON file like so:
 date: 2017-04-02
 ```
 
-In a real-world program, more error checking would be required. If you encounter an invalid token (e.g. you're expecting a number but a string is given) you should throw a `cgon::parse_error`. The first argument given to the constructor of `cgon::parse_error` is an error message. The second is the problematic token. For example, from examples/custom_properties/custom_properties.cpp:
+In a real-world program, more error checking would be required. If you encounter an invalid token (e.g. you're expecting a number but a string is given) you should throw a `cgon::parse_error`. The first argument given to the constructor of `cgon::parse_error` should be an error message. The second should be the problematic token. For example, from examples/custom_properties/custom_properties.cpp:
 
 ```cpp
 if(value < 0) {
@@ -49,7 +49,7 @@ if(value < 0) {
 }
 ```
 
-would result in the following error if a negative price is provided:
+would result in the following error message being displayed if a negative price is provided:
 
 ```
   what():  The price cannot be negative:
