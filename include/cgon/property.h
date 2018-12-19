@@ -26,6 +26,7 @@
 #include <type_traits>
 
 #include "token.h"
+#include "container_traits.h"
 
 namespace cgon {
 	class object;
@@ -46,7 +47,7 @@ namespace cgon {
 			return (owner->*T_getter)();
 		}
 
-		static void set(T_owner* owner, T_type value) {
+		static void set(T_owner* owner, T_type& value) {
 			(owner->*T_setter)(value);
 		}
 	};
@@ -67,8 +68,12 @@ namespace cgon {
 			return (owner->*T_pointer);
 		}
 
-		static void set(T_owner* owner, T_type value) {
-			(owner->*T_pointer) = value;
+		static void set(T_owner* owner, T_type& value) {
+			if constexpr(is_unique_ptr<T_type>::value) {
+				(owner->*T_pointer).swap(value);
+			} else {
+				(owner->*T_pointer) = value;
+			}
 		}
 	};
 }

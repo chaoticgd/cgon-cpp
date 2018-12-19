@@ -28,6 +28,7 @@
 #include <vector>
 #include <array>
 #include <tuple>
+#include <memory>
 
 namespace cgon {
 	template <typename T> struct is_optional : std::false_type {};
@@ -41,6 +42,9 @@ namespace cgon {
 
 	template <typename T> struct is_tuple : std::false_type {};
 	template <typename... T> struct is_tuple<std::tuple<T...>> : std::true_type {};
+
+	template <typename T> struct is_unique_ptr : std::false_type {};
+	template <typename T> struct is_unique_ptr<std::unique_ptr<T>> : std::true_type {};
 }
 
 #endif

@@ -74,6 +74,7 @@ namespace cgon {
 				std::tuple_element<T_index, T_child_types>::type;
 
 			if(current->value() == get_string<typename child_type::type_name>::value()) {
+				current++; // Skip over type name.
 				return parse_object_of_type<child_type>(current);
 			}
 
@@ -86,9 +87,6 @@ namespace cgon {
 	template <typename T>
 	std::unique_ptr<T> parse_object_of_type(token_iterator& current) {
 		
-		token_iterator type_name_iterator = current++;
-		std::string_view type_name = type_name_iterator->value();
-
 		std::unique_ptr<T> result = std::make_unique<T>();
 
 		if((current++)->value() != "{") {
@@ -188,6 +186,8 @@ namespace cgon {
 			return parse_arithmetic_expression<T>(current);
 		} else if constexpr(std::is_same<T, std::string>()) {
 			return parse_string(current);
+		} else if constexpr(is_unique_ptr<T>::value) {
+			return parse_object_of_type<typename T::element_type>(current);
 		} else {
 			return T(current);
 		}
