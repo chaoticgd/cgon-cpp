@@ -34,31 +34,41 @@ namespace cgon {
 	class token {
 	public:
 		token(std::string_view value, size_t offset, std::string_view text)
-			: _value(value), _line(1), _column(1) {
-			
-			for(int i = 0; i < offset - value.size(); i++) {
-				if(text[i] == '\n') {
-					_line++;
-					_column = 1;
-				} else {
-					_column++;
-				}
-			}
-			
-		}
+			: _value(value), _offset(offset), _text(text) {}
 
 		std::string_view value() const { return _value; }
 		std::string copy_value() const { return static_cast<std::string>(_value); }
-		int line() const { return _line; }
+		
+		int line() const {
+			int line = 0;
+			for(int i = 0; i < _offset - _value.size(); i++) {
+				if(_text[i] == '\n') {
+					line++;
+				}
+			}
+			return line;
+		}
+
+		int column() const {
+			int column = 0;
+			for(int i = 0; i < _offset - _value.size(); i++) {
+				if(_text[i] == '\n') {
+					column = 1;
+				} else {
+					column++;
+				}
+			}
+			return column;
+		}
 
 		std::string to_string() const {
-			std::string position = std::to_string(_line) + ":" + std::to_string(_column);
+			std::string position = std::to_string(line()) + ":" + std::to_string(column());
 			return std::string("'") + static_cast<std::string>(value()) + "' at " + position;
 		}
 
 	private:
-		std::string_view _value;
-		size_t _line, _column;
+		std::string_view _value, _text;
+		size_t _offset;
 	};
 
 	typedef std::vector<token>::iterator base_token_iterator;
