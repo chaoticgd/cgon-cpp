@@ -41,7 +41,7 @@ namespace cgon {
 	void parse_property(token_iterator& current, T_owner* owner);
 
 	template <typename T_properties, int T_index>
-	void validate_properties(token_iterator& current, std::vector<std::string> property_names);
+	void validate_properties(token_iterator& current, std::vector<std::string_view> property_names);
 
 	template <typename T>
 	T parse_expression(token_iterator& current);
@@ -85,24 +85,24 @@ namespace cgon {
 	std::unique_ptr<T> parse_object_of_type(token_iterator& current) {
 		
 		token_iterator type_name_iterator = current++;
-		std::string type_name = type_name_iterator->value();
+		std::string_view type_name = type_name_iterator->value();
 
 		std::unique_ptr<T> result = std::make_unique<T>();
 
 		if((current++)->value() != "{") {
-			result->set_name((current - 1)->value());
+			result->set_name((current - 1)->copy_value());
 
 			if((current++)->value() != "{") {
 				throw parse_error("Expected '{'", current - 1);
 			}
 		}
 
-		std::vector<std::string> property_names;
+		std::vector<std::string_view> property_names;
 
 		while(current->value() != "}") {
 
 			if((current + 1)->value() == ":") {
-				std::string property_name = current->value();
+				std::string_view property_name = current->value();
 				if(std::find(property_names.begin(), property_names.end(),
 				             property_name) != property_names.end()) {
 					throw parse_error("Multiple definitions of property", current);
@@ -149,7 +149,7 @@ namespace cgon {
 	}
 
 	template <typename T_properties, int T_index>
-	void validate_properties(token_iterator& current, std::vector<std::string> property_names) {
+	void validate_properties(token_iterator& current, std::vector<std::string_view> property_names) {
 
 		if constexpr(T_index < std::tuple_size<T_properties>::value) {
 
@@ -256,16 +256,16 @@ namespace cgon {
 
 	template <typename T>
 	T parse_arithmetic_expression(token_iterator& current) {
-		return std::stod((current++)->value());
+		return std::stod((current++)->copy_value());
 	}
 
 	std::string parse_string(token_iterator& current) {
-		std::string token_value = (current++)->value();
+		std::string_view token_value = current->value();
 		if((*(token_value.begin()) != '\'' || *(token_value.end() - 1) != '\'') &&
 		   (*(token_value.begin()) != '\"' || *(token_value.end() - 1) != '\"')) {
 			throw parse_error("String expected", current - 1);
 		}
-		return token_value.substr(1, token_value.size() - 2);
+		return (current++)->copy_value().substr(1, token_value.size() - 2);
 	}
 }
 

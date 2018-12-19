@@ -33,7 +33,7 @@
 namespace cgon {
 	class token {
 	public:
-		token(std::string value, size_t offset, std::string_view text)
+		token(std::string_view value, size_t offset, std::string_view text)
 			: _value(value), _line(1), _column(1) {
 			
 			for(int i = 0; i < offset - value.size(); i++) {
@@ -47,16 +47,17 @@ namespace cgon {
 			
 		}
 
-		std::string value() const { return _value; }
+		std::string_view value() const { return _value; }
+		std::string copy_value() const { return static_cast<std::string>(_value); }
 		int line() const { return _line; }
 
 		std::string to_string() const {
 			std::string position = std::to_string(_line) + ":" + std::to_string(_column);
-			return std::string("'") + value() + "' at " + position;
+			return std::string("'") + static_cast<std::string>(value()) + "' at " + position;
 		}
 
 	private:
-		std::string _value;
+		std::string_view _value;
 		size_t _line, _column;
 	};
 
@@ -120,7 +121,7 @@ namespace cgon {
 				if(current == *this) {
 					result += "\x1B[31m"; // Set the text colour to red.
 				}
-				result += current->value() + " ";
+				result += current->copy_value() + " ";
 				if(current == *this) {
 					result += "\033[0m"; // Restore the text colour.
 				}
