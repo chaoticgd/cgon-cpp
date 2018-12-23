@@ -148,7 +148,7 @@ namespace cgon {
 		void check_error() {
 			base_token_iterator iter = *static_cast<base_token_iterator*>(this);
 			if(iter >= _end) {
-				unexpected_end_of_file_error();
+				throw unexpected_end_of_file_error();
 			}
 		}
 
