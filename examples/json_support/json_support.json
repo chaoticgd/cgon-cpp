@@ -1,0 +1,13 @@
+{
+	"name": "Loren Ipsum",
+	"date_of_birth": {
+		"year": 91,
+		"month": 14,
+		"day": 12
+	},
+	"hobbies": [
+		"programming",
+		"underwater basket weaving",
+		"stochastic analysis of aquatic permutations of orthographic projections"
+	]
+}
