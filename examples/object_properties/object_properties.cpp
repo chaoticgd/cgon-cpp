@@ -1,7 +1,6 @@
 #include <iostream>
 
-#include <cgon/document_schema.h>
-#include <cgon/property.h>
+#include <cgon/document.h>
 
 struct config_difficulty {
 
@@ -71,12 +70,12 @@ struct config : public cgon::object {
 };
 
 int main() {
-	cgon::document_schema<config> schema;
-	std::unique_ptr<config> config = schema.read_file("object_properties.cgon");
+	std::unique_ptr<config> root =
+		cgon::read_file<config>("object_properties.cgon");
 
 	std::cout << "Config:\n"
-	          << "\tDifficulty: " << config->gameplay->difficulty.to_string() << "\n"
-	          << "\tWindow Size: " << std::get<0>(config->video->window_size)
-	                     << ", " << std::get<1>(config->video->window_size) << "\n"
-	          << "\tFullscreen: " << (config->video->fullscreen ? "Yes" : "No") << "\n";
+	          << "\tDifficulty: " << root->gameplay->difficulty.to_string() << "\n"
+	          << "\tWindow Size: " << std::get<0>(root->video->window_size)
+	                     << ", " << std::get<1>(root->video->window_size) << "\n"
+	          << "\tFullscreen: " << (root->video->fullscreen ? "Yes" : "No") << "\n";
 }

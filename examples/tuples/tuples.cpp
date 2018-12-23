@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cgon/document_schema.h>
+#include <cgon/document.h>
 
 typedef std::tuple<std::string, std::string, int> user;
 
@@ -21,10 +21,8 @@ private:
 };
 
 int main() {
-	cgon::document_schema<tuples_example> lists_schema;
-
 	std::unique_ptr<tuples_example> lists =
-		lists_schema.read_file("tuples.cgon");
+		cgon::read_file<tuples_example>("tuples.cgon");
 
 	for(user current : lists->get_users()) {
 		std::cout << std::get<0>(current) << " has password " << std::get<1>(current) << " and DoB " << std::get<2>(current) << "\n";

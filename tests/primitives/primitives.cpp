@@ -22,7 +22,7 @@
 
 #include "gtest/gtest.h"
 
-#include <cgon/document_schema.h>
+#include <cgon/document.h>
 
 class numbers : public cgon::object {
 public:
@@ -65,9 +65,8 @@ struct booleans : public cgon::object {
 };
 
 TEST(primitives, numbers) {
-	cgon::document_schema<numbers> schema;
 	std::unique_ptr<numbers> root =
-		schema.read_file("primitives/numbers.cgon");
+		cgon::read_file<numbers>("primitives/numbers.cgon");
 
 	EXPECT_EQ(root->a(), 1337);
 	EXPECT_EQ(root->b(), 123456789);
@@ -76,9 +75,8 @@ TEST(primitives, numbers) {
 }
 
 TEST(primitives, booleans) {
-	cgon::document_schema<booleans> schema;
 	std::unique_ptr<booleans> root =
-		schema.read_file("primitives/booleans.cgon");
+		cgon::read_file<booleans>("primitives/booleans.cgon");
 	
 	EXPECT_EQ(root->a, false);
 	EXPECT_EQ(root->b, true);

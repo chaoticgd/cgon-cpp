@@ -1,6 +1,5 @@
 #include <iostream>
-#include <cgon/document_schema.h>
-#include <cgon/token.h>
+#include <cgon/document.h>
 
 struct transaction_id {
 
@@ -115,10 +114,8 @@ struct transactions : public cgon::object {
 };
 
 int main() {
-	cgon::document_schema<transactions> colours_schema;
-	
 	std::unique_ptr<transactions> colours =
-		colours_schema.read_file("custom_properties.cgon");
+		cgon::read_file<transactions>("custom_properties.cgon");
 
 	for(transaction* t : colours->children_of_type<transaction>()) {
 		std::cout << "Transaction " << t->id.to_string()

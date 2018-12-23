@@ -22,7 +22,7 @@
 
 #include "gtest/gtest.h"
 
-#include <cgon/document_schema.h>
+#include <cgon/document.h>
 
 class c : public cgon::object {
 public:
@@ -57,10 +57,8 @@ private:
 };
 
 TEST(minified, main) {
-	cgon::document_schema<a> minified_schema;
-
 	std::unique_ptr<a> root =
-		minified_schema.read_file("minified/minified.cgon");
+		cgon::read_file<a>("minified/minified.cgon");
 
 	EXPECT_EQ(root->b(), 1337);
 

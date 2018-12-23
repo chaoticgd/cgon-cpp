@@ -1,6 +1,6 @@
 #include <iostream>
 #include <array>
-#include <cgon/document_schema.h>
+#include <cgon/document.h>
 
 class lists : public cgon::object {
 public:
@@ -14,7 +14,7 @@ public:
 	std::vector<std::string> get_strings() { return strings; }
 	void set_strings(std::vector<std::string> s) { strings = s; }
 
-	using type_name = decltype("lists"_cgon_s);
+	using type_name = decltype("lists_example"_cgon_s);
 	using child_types = std::tuple<>;
 	using properties = std::tuple<
 		cgon::property<decltype("primes"_cgon_s), std::vector<int>,
@@ -32,24 +32,22 @@ private:
 };
 
 int main() {
-	cgon::document_schema<lists> lists_schema;
+	std::unique_ptr<lists> root =
+		cgon::read_file<lists>("lists.cgon");
 
-	std::unique_ptr<lists> lists =
-		lists_schema.read_file("lists.cgon");
-
-	for(int prime : lists->get_primes()) {
+	for(int prime : root->get_primes()) {
 		std::cout << prime << " ";
 	}
 	std::cout << std::endl;
 
-	for(auto sub_list : lists->get_multi_dimensional()) {
+	for(auto sub_list : root->get_multi_dimensional()) {
 		for(auto number : sub_list) {
 			std::cout << number << " ";
 		}
 		std::cout << std::endl;
 	}
 
-	for(auto string : lists->get_strings()) {
+	for(auto string : root->get_strings()) {
 		std::cout << string << std::endl;
 	}
 }

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cgon/document_schema.h>
+#include <cgon/document.h>
 
 class strings_example : public cgon::object {
 public:
@@ -20,10 +20,8 @@ private:
 };
 
 int main() {
-	cgon::document_schema<strings_example> strings_schema;
-
 	std::unique_ptr<strings_example> strings =
-		strings_schema.read_file("strings.cgon");
+		cgon::read_file<strings_example>("strings.cgon");
 
 	std::cout << strings->greeting() << std::endl;
 }

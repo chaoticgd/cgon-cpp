@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cgon/document_schema.h>
+#include <cgon/document.h>
 
 class colour : public cgon::object {
 public:
@@ -38,16 +38,14 @@ private:
 
 class colour_list : public cgon::object {
 public:
-	using type_name = decltype("colour"_cgon_s);
+	using type_name = decltype("colour_list"_cgon_s);
 	using child_types = std::tuple<colour>;
 	using properties = std::tuple<>;
 };
 
 int main() {
-	cgon::document_schema<colour_list> colours_schema;
-	
 	std::unique_ptr<colour_list> colours =
-		colours_schema.read_file("colours.cgon");
+		cgon::read_file<colour_list>("colours.cgon");
 
 	for(colour* c : colours->children_of_type<colour>()) {
 		std::cout << c->name() << ": " << c->get_red() << " " << c->get_green() << " " << c->get_blue();

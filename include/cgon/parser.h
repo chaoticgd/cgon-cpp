@@ -31,41 +31,42 @@
 
 namespace cgon {
 
-	template <typename T_child_types, int T_index>
+	template <typename T_language, typename T_child_types, int T_index>
 	std::unique_ptr<object> parse_object(token_iterator& current);
 
-	template <typename T>
+	template <typename T_language, typename T>
 	std::unique_ptr<T> parse_object_of_type(token_iterator& current);
 
-	template <typename T_owner, typename T_properties, int T_index>
+	template <typename T_language, typename T_owner, typename T_properties, int T_index>
 	void parse_property(token_iterator& current, T_owner* owner);
 
-	template <typename T_properties, int T_index>
+	template <typename T_language, typename T_properties, int T_index>
 	void validate_properties(token_iterator& current, std::vector<std::string_view> property_names);
 
-	template <typename T>
+	template <typename T_language, typename T>
 	T parse_expression(token_iterator& current);
 
-	template <typename T>
+	template <typename T_language, typename T>
 	T parse_vector(token_iterator& current);
 	
-	template <typename T>
+	template <typename T_language, typename T>
 	T parse_array(token_iterator& current);
 
-	template <typename T>
+	template <typename T_language, typename T>
 	T parse_tuple(token_iterator& current);
 
-	template <typename T_tuple, int T_index>
+	template <typename T_language, typename T_tuple, int T_index>
 	void parse_tuple_element(token_iterator& current, T_tuple& tuple);
 
-	template <typename T>
+	template <typename T_language, typename T>
 	T parse_arithmetic_expression(token_iterator& current);
 
 	static bool parse_bool(token_iterator& current);
 
-	static std::string parse_string(token_iterator& current);
+	template <typename T_language>
+	std::string parse_string(token_iterator& current);
 
-	template <typename T_child_types, int T_index>
+	template <typename T_language, typename T_child_types, int T_index>
 	std::unique_ptr<object> parse_object(token_iterator& current) {
 
 		if constexpr(T_index < std::tuple_size<T_child_types>::value) {
@@ -75,16 +76,16 @@ namespace cgon {
 
 			if(current->value() == get_string<typename child_type::type_name>::value()) {
 				current++; // Skip over type name.
-				return parse_object_of_type<child_type>(current);
+				return parse_object_of_type<T_language, child_type>(current);
 			}
 
-			return parse_object<T_child_types, T_index + 1>(current);
+			return parse_object<T_language, T_child_types, T_index + 1>(current);
 		}
 
 		throw parse_error("Invalid type name", current);
 	}
 
-	template <typename T>
+	template <typename T_language, typename T>
 	std::unique_ptr<T> parse_object_of_type(token_iterator& current) {
 		
 		std::unique_ptr<T> result = std::make_unique<T>();
@@ -109,23 +110,23 @@ namespace cgon {
 				} else {
 					property_names.push_back(property_name);
 				}
-				parse_property<T, typename T::properties, 0>(current, result.get());
+				parse_property<T_language, T, typename T::properties, 0>(current, result.get());
 			} else if constexpr(std::tuple_size<typename T::child_types>::value > 0) {
 				std::unique_ptr<object> new_child(
-					parse_object<typename T::child_types, 0>(current));
+					parse_object<T_language, typename T::child_types, 0>(current));
 				result->append_child(new_child);
 			}
 
 		}
 
-		validate_properties<typename T::properties, 0>(current, property_names);
+		validate_properties<T_language, typename T::properties, 0>(current, property_names);
 
 		current++; // Skip over '}'.
 
 		return result;
 	}
 
-	template <typename T_owner, typename T_properties, int T_index>
+	template <typename T_language, typename T_owner, typename T_properties, int T_index>
 	void parse_property(token_iterator& current, T_owner* owner) {
 
 		if constexpr(T_index < std::tuple_size<T_properties>::value) {
@@ -136,19 +137,19 @@ namespace cgon {
 			if(current->value() == get_string<typename property::name>::value()) {
 				current += 2; // Skip over property name and '='.
 				typename property::type value =
-					parse_expression<typename property::type>(current);
+					parse_expression<T_language, typename property::type>(current);
 				property::set(owner, value);
 				return;
 			}
 
-			parse_property<T_owner, T_properties, T_index + 1>(current, owner);
+			parse_property<T_language, T_owner, T_properties, T_index + 1>(current, owner);
 			return;
 		}
 
 		throw parse_error("Invalid property name", current);
 	}
 
-	template <typename T_properties, int T_index>
+	template <typename T_language, typename T_properties, int T_index>
 	void validate_properties(token_iterator& current, std::vector<std::string_view> property_names) {
 
 		if constexpr(T_index < std::tuple_size<T_properties>::value) {
@@ -165,35 +166,35 @@ namespace cgon {
 				throw parse_error(std::string("Property '") + property_name + "' has not been defined", current);
 			}
 
-			validate_properties<T_properties, T_index + 1>(current, property_names);
+			validate_properties<T_language, T_properties, T_index + 1>(current, property_names);
 		}
 	}
 
-	template <typename T>
+	template <typename T_language, typename T>
 	T parse_expression(token_iterator& current) {
 		
 		if constexpr(is_optional<T>::value) {
-			return parse_expression<typename T::value_type>(current);
+			return parse_expression<T_language, typename T::value_type>(current);
 		} else if constexpr(is_vector<T>::value) {
-			return parse_vector<T>(current);
+			return parse_vector<T_language, T>(current);
 		} else if constexpr(is_array<T>::value) {
-			return parse_array<T>(current);
+			return parse_array<T_language, T>(current);
 		} else if constexpr(is_tuple<T>::value) {
-			return parse_tuple<T>(current);
+			return parse_tuple<T_language, T>(current);
 		} else if constexpr(std::is_same<T, bool>()) {
 			return parse_bool(current);
 		} else if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
-			return parse_arithmetic_expression<T>(current);
+			return parse_arithmetic_expression<T_language, T>(current);
 		} else if constexpr(std::is_same<T, std::string>()) {
-			return parse_string(current);
+			return parse_string<T_language>(current);
 		} else if constexpr(is_unique_ptr<T>::value) {
-			return parse_object_of_type<typename T::element_type>(current);
+			return parse_object_of_type<T_language, typename T::element_type>(current);
 		} else {
 			return T(current);
 		}
 	}
 
-	template <typename T>
+	template <typename T_language, typename T>
 	T parse_vector(token_iterator& current) {
 		if((current++)->value() != "[") {
 			throw parse_error("Expected '['", current - 1);
@@ -201,7 +202,7 @@ namespace cgon {
 
 		T result;
 		while(current->value() != "]") {
-			typename T::value_type value = parse_expression<typename T::value_type>(current);
+			typename T::value_type value = parse_expression<T_language, typename T::value_type>(current);
 			result.push_back(value);
 		}
 
@@ -210,7 +211,7 @@ namespace cgon {
 		return result;
 	}
 
-	template <typename T>
+	template <typename T_language, typename T>
 	T parse_array(token_iterator& current) {
 		if((current++)->value() != "[") {
 			throw parse_error("Expected '['", current - 1);
@@ -218,7 +219,7 @@ namespace cgon {
 
 		T result;
 		for(typename T::value_type& element : result) {
-			element = parse_expression<typename T::value_type>(current);
+			element = parse_expression<T_language, typename T::value_type>(current);
 		}
 
 		if((current++)->value() != "]") {
@@ -228,14 +229,14 @@ namespace cgon {
 		return result;
 	}
 
-	template <typename T>
+	template <typename T_language, typename T>
 	T parse_tuple(token_iterator& current) {
 		if((current++)->value() != "(") {
 			throw parse_error("Expected '('", current - 1);
 		}
 
 		T result;
-		parse_tuple_element<T, 0>(current, result);
+		parse_tuple_element<T_language, T, 0>(current, result);
 
 		if((current++)->value() != ")") {
 			throw parse_error("Expected ')'", current - 1);
@@ -244,21 +245,21 @@ namespace cgon {
 		return result;
 	}
 
-	template <typename T_tuple, int T_index>
+	template <typename T_language, typename T_tuple, int T_index>
 	void parse_tuple_element(token_iterator& current, T_tuple& tuple) {
 
 		using element_type = typename std::tuple_element<T_index, T_tuple>::type;
 
 		std::get<T_index>(tuple) =
-			parse_expression<element_type>(current);
+			parse_expression<T_language, element_type>(current);
 
 		if constexpr(T_index + 1 < std::tuple_size<T_tuple>::value) {
-			parse_tuple_element<T_tuple, T_index + 1>(current, tuple);
+			parse_tuple_element<T_language, T_tuple, T_index + 1>(current, tuple);
 		}
 
 	}
 
-	template <typename T>
+	template <typename T_language, typename T>
 	T parse_arithmetic_expression(token_iterator& current) {
 		try {
 			return std::stod((current++)->copy_value());
@@ -278,6 +279,7 @@ namespace cgon {
 		}
 	}
 
+	template <typename T_language>
 	std::string parse_string(token_iterator& current) {
 		std::string_view token_value = current->value();
 		if((*(token_value.begin()) != '\'' || *(token_value.end() - 1) != '\'') &&
