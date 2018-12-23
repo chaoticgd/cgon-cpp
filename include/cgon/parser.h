@@ -41,7 +41,7 @@ namespace cgon {
 	void parse_property(token_iterator& current, const std::string& given_name, T_owner* owner);
 
 	template <typename T_language, typename T_properties, int T_index>
-	void validate_properties(token_iterator& current, std::vector<std::string_view> property_names);
+	void validate_properties(token_iterator& current, std::vector<std::string> property_names);
 
 	template <typename T_language, typename T>
 	T parse_expression(token_iterator& current);
@@ -112,7 +112,7 @@ namespace cgon {
 			}
 		}
 
-		std::vector<std::string_view> property_names;
+		std::vector<std::string> property_names;
 
 		while(current->value() != "}") {
 
@@ -134,7 +134,7 @@ namespace cgon {
 
 				if(std::find(property_names.begin(), property_names.end(),
 				             property_name) != property_names.end()) {
-					throw parse_error("Multiple definitions of property", current);
+					throw parse_error(std::string("Multiple definitions of property '") + property_name + "'", current - 1);
 				} else {
 					property_names.push_back(property_name);
 				}
@@ -161,7 +161,7 @@ namespace cgon {
 			}
 		}
 
-		//validate_properties<T_language, typename T::properties, 0>(current, property_names);
+		validate_properties<T_language, typename T::properties, 0>(current, property_names);
 
 		current++; // Skip over '}'.
 
@@ -191,7 +191,7 @@ namespace cgon {
 	}
 
 	template <typename T_language, typename T_properties, int T_index>
-	void validate_properties(token_iterator& current, std::vector<std::string_view> property_names) {
+	void validate_properties(token_iterator& current, std::vector<std::string> property_names) {
 
 		if constexpr(T_index < std::tuple_size<T_properties>::value) {
 
