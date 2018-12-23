@@ -38,7 +38,7 @@ namespace cgon {
 	std::unique_ptr<T> parse_object_of_type(token_iterator& current);
 
 	template <typename T_language, typename T_owner, typename T_properties, int T_index>
-	void parse_property(token_iterator& current, T_owner* owner);
+	void parse_property(token_iterator& current, const std::string& given_name, T_owner* owner);
 
 	template <typename T_language, typename T_properties, int T_index>
 	void validate_properties(token_iterator& current, std::vector<std::string_view> property_names);
@@ -66,6 +66,9 @@ namespace cgon {
 	template <typename T_language>
 	std::string parse_string(token_iterator& current);
 
+	template <typename T_language>
+	void parse_delimiter(token_iterator& current);
+
 	template <typename T_language, typename T_child_types, int T_index>
 	std::unique_ptr<object> parse_object(token_iterator& current) {
 
@@ -91,9 +94,20 @@ namespace cgon {
 		std::unique_ptr<T> result = std::make_unique<T>();
 
 		if((current++)->value() != "{") {
-			result->set_name((current - 1)->copy_value());
 
-			if((current++)->value() != "{") {
+			bool error = false;
+
+			if constexpr(T_language::allow_named_objects) {
+				result->set_name((current - 1)->copy_value());
+
+				if((current++)->value() != "{") {
+					error = true;
+				}
+			} else {
+				error = true;
+			}
+
+			if(error) {
 				throw parse_error("Expected '{'", current - 1);
 			}
 		}
@@ -102,24 +116,52 @@ namespace cgon {
 
 		while(current->value() != "}") {
 
+			bool error = false;
+
+			if constexpr(T_language::delimit_lists) {
+				if(property_names.size() > 0) {
+					parse_delimiter<T_language>(current);
+				}
+			}
+
 			if((current + 1)->value() == ":") {
-				std::string_view property_name = current->value();
+				std::string property_name = current->copy_value();
+				if constexpr(T_language::quoted_property_names) {
+					property_name = parse_string<T_language>(current);
+				} else {
+					current++;
+				}
+
 				if(std::find(property_names.begin(), property_names.end(),
 				             property_name) != property_names.end()) {
 					throw parse_error("Multiple definitions of property", current);
 				} else {
 					property_names.push_back(property_name);
 				}
-				parse_property<T_language, T, typename T::properties, 0>(current, result.get());
-			} else if constexpr(std::tuple_size<typename T::child_types>::value > 0) {
-				std::unique_ptr<object> new_child(
-					parse_object<T_language, typename T::child_types, 0>(current));
-				result->append_child(new_child);
+
+				current++; // Skip over ':'.
+
+				parse_property<T_language, T, typename T::properties, 0>
+					(current, property_name, result.get());
+					
+			} else if constexpr(T_language::allow_children) {
+				if constexpr(std::tuple_size<typename T::child_types>::value > 0) {
+					std::unique_ptr<object> new_child(
+						parse_object<T_language, typename T::child_types, 0>(current));
+					result->append_child(new_child);
+				} else {
+					error = true;
+				}
+			} else {
+				error = true;
 			}
 
+			if(error) {
+				throw parse_error("Expected property", current);
+			}
 		}
 
-		validate_properties<T_language, typename T::properties, 0>(current, property_names);
+		//validate_properties<T_language, typename T::properties, 0>(current, property_names);
 
 		current++; // Skip over '}'.
 
@@ -127,22 +169,21 @@ namespace cgon {
 	}
 
 	template <typename T_language, typename T_owner, typename T_properties, int T_index>
-	void parse_property(token_iterator& current, T_owner* owner) {
+	void parse_property(token_iterator& current, const std::string& given_name, T_owner* owner) {
 
 		if constexpr(T_index < std::tuple_size<T_properties>::value) {
 
 			using property = typename
 				std::tuple_element<T_index, T_properties>::type;
 			
-			if(current->value() == get_string<typename property::name>::value()) {
-				current += 2; // Skip over property name and '='.
+			if(given_name == get_string<typename property::name>::value()) {
 				typename property::type value =
 					parse_expression<T_language, typename property::type>(current);
 				property::set(owner, value);
 				return;
 			}
 
-			parse_property<T_language, T_owner, T_properties, T_index + 1>(current, owner);
+			parse_property<T_language, T_owner, T_properties, T_index + 1>(current, given_name, owner);
 			return;
 		}
 
@@ -202,6 +243,11 @@ namespace cgon {
 
 		T result;
 		while(current->value() != "]") {
+
+			if(result.size() != 0) {
+				parse_delimiter<T_language>(current);
+			}
+
 			typename T::value_type value = parse_expression<T_language, typename T::value_type>(current);
 			result.push_back(value);
 		}
@@ -218,7 +264,14 @@ namespace cgon {
 		}
 
 		T result;
+		bool first_element = true;
 		for(typename T::value_type& element : result) {
+
+			if(first_element) {
+				parse_delimiter<T_language>(current);
+				first_element = false;
+			}
+
 			element = parse_expression<T_language, typename T::value_type>(current);
 		}
 
@@ -282,11 +335,28 @@ namespace cgon {
 	template <typename T_language>
 	std::string parse_string(token_iterator& current) {
 		std::string_view token_value = current->value();
-		if((*(token_value.begin()) != '\'' || *(token_value.end() - 1) != '\'') &&
-		   (*(token_value.begin()) != '\"' || *(token_value.end() - 1) != '\"')) {
+
+		bool error;
+			(*(token_value.begin()) != '\'' || *(token_value.end() - 1) != '\'');
+
+		if constexpr(T_language::allow_single_quoted_strings) {
+			error &= (*(token_value.begin()) != '\"' || *(token_value.end() - 1) != '\"');
+		} 
+
+		if(error) {
 			throw parse_error("String expected", current - 1);
 		}
+
 		return (current++)->copy_value().substr(1, token_value.size() - 2);
+	}
+
+	template <typename T_language>
+	void parse_delimiter(token_iterator& current) {
+		if constexpr(T_language::delimit_lists) {
+			if((current++)->value() != ",") {
+				throw parse_error("Expected ','", current - 1);
+			}
+		}
 	}
 }
 

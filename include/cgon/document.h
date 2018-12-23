@@ -57,8 +57,11 @@ namespace cgon {
 		std::vector<token> tokens = tokenize(data);
 			
 		token_iterator current(tokens.begin(), tokens.begin(), tokens.end());
-		if((current++)->value() != get_string<typename T::type_name>::value()) {
-			throw parse_error("Invalid root object type.", current - 1);
+
+		if constexpr(T_language::require_explicit_top_level_type_name) {
+			if((current++)->value() != get_string<typename T::type_name>::value()) {
+				throw parse_error("Invalid root object type.", current - 1);
+			}
 		}
 
 		std::unique_ptr<T> root;
