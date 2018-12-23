@@ -336,7 +336,7 @@ namespace cgon {
 	std::string parse_string(token_iterator& current) {
 		std::string_view token_value = current->value();
 
-		bool error;
+		bool error =
 			(*(token_value.begin()) != '\'' || *(token_value.end() - 1) != '\'');
 
 		if constexpr(T_language::allow_single_quoted_strings) {

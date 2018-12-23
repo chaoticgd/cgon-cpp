@@ -31,7 +31,7 @@
 
 namespace cgon {
 	static std::string strip_comments(std::string text);
-	static bool find_next_comment(std::string& text, int& position, const char* pattern);
+	static bool find_next_comment(std::string& text, std::size_t& position, const char* pattern);
 
 	std::string strip_comments(std::string text) {
 		
@@ -41,9 +41,9 @@ namespace cgon {
 		};
 
 		for(auto comment_type : comment_types) {
-			int position = -1;
+			std::size_t position = -1;
 			while(find_next_comment(text, position, std::get<0>(comment_type))) {
-				int end_position = text.find(std::get<1>(comment_type), position);
+				std::size_t end_position = text.find(std::get<1>(comment_type), position);
 				if(end_position == std::string::npos) {
 					throw parse_error("Unterminated comment");
 				}
@@ -54,7 +54,7 @@ namespace cgon {
 		return text;
 	}
 
-	bool find_next_comment(std::string& text, int& position, const char* pattern) {
+	bool find_next_comment(std::string& text, std::size_t& position, const char* pattern) {
 		position = text.find(pattern);
 		return position != std::string::npos;
 	}

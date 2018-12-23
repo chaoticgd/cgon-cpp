@@ -33,15 +33,15 @@
 namespace cgon {
 	class token {
 	public:
-		token(std::string_view value, size_t offset, std::string_view text)
-			: _value(value), _offset(offset), _text(text) {}
+		token(std::string_view value, std::size_t offset, std::string_view text)
+			: _value(value), _text(text), _offset(offset) {}
 
 		std::string_view value() const { return _value; }
 		std::string copy_value() const { return static_cast<std::string>(_value); }
 		
 		int line() const {
 			int line = 0;
-			for(int i = 0; i < _offset - _value.size(); i++) {
+			for(std::size_t i = 0; i < _offset - _value.size(); i++) {
 				if(_text[i] == '\n') {
 					line++;
 				}
@@ -51,7 +51,7 @@ namespace cgon {
 
 		int column() const {
 			int column = 0;
-			for(int i = 0; i < _offset - _value.size(); i++) {
+			for(std::size_t i = 0; i < _offset - _value.size(); i++) {
 				if(_text[i] == '\n') {
 					column = 1;
 				} else {
@@ -68,7 +68,7 @@ namespace cgon {
 
 	private:
 		std::string_view _value, _text;
-		size_t _offset;
+		std::size_t _offset;
 	};
 
 	typedef std::vector<token>::iterator base_token_iterator;
@@ -96,7 +96,7 @@ namespace cgon {
 		}
 
 		token_iterator& operator++() {
-			auto result = base_token_iterator::operator++();
+			base_token_iterator::operator++();
 			return *this;
 		}
 
