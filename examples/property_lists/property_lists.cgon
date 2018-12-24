@@ -1,0 +1,9 @@
+config {
+	gameplay: {
+		difficulty: NORMAL
+	}
+	video: {
+		window_size: (800 600)
+		fullscreen: false
+	}
+}
