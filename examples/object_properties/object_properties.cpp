@@ -74,8 +74,8 @@ int main() {
 		cgon::read_file<config>("object_properties.cgon");
 
 	std::cout << "Config:\n"
-	          << "\tDifficulty: " << root->gameplay->difficulty.to_string() << "\n"
-	          << "\tWindow Size: " << std::get<0>(root->video->window_size)
-	                     << ", " << std::get<1>(root->video->window_size) << "\n"
-	          << "\tFullscreen: " << (root->video->fullscreen ? "Yes" : "No") << "\n";
+	           << "\tDifficulty: "  << root->gameplay->difficulty.to_string() << "\n"
+	           << "\tWindow Size: " << std::get<0>(root->video->window_size)
+	           << ", "              << std::get<1>(root->video->window_size) << "\n"
+	           << "\tFullscreen: "  << (root->video->fullscreen ? "Yes" : "No") << "\n";
 }

@@ -3,7 +3,7 @@ config {
 		difficulty: NORMAL
 	}
 	video: {
-		window_size: (800, 600)
+		window_size: (800 600)
 		fullscreen: false
 	}
 }

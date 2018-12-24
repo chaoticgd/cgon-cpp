@@ -35,8 +35,8 @@ namespace cgon {
 	          T_type(T_owner::*T_getter)(), void(T_owner::*T_setter)(T_type value)>
 	struct property {
 
-		template <typename T_language, typename T_owner_func, typename T_properties, int T_index>
-		friend void parse_property(token_iterator& current, const std::string& given_name, T_owner_func* owner);
+		template <typename T_language_f, typename T_owner_f, typename T_properties_f, std::size_t T_index_f>
+		friend void parse_property(token_iterator& current, const std::string& given_name, T_owner_f* owner);
 
 		using name = T_name;
 		using type = T_type;
@@ -50,14 +50,16 @@ namespace cgon {
 		static void set(T_owner* owner, T_type& value) {
 			(owner->*T_setter)(value);
 		}
+
+		const static bool is_property_list = false;
 	};
 
 	template <typename T_name, typename T_type, typename T_owner,
 	          T_type T_owner::*T_pointer>
 	struct pointer_property {
 
-		template <typename T_language, typename T_owner_func, typename T_properties, int T_index>
-		friend void parse_property(token_iterator& current, const std::string& given_name, T_owner_func* owner);
+		template <typename T_language_f, typename T_owner_f, typename T_properties_f, std::size_t T_index_f>
+		friend void parse_property(token_iterator& current, const std::string& given_name, T_owner_f* owner);
 
 		using name = T_name;
 		using type = T_type;
@@ -75,6 +77,36 @@ namespace cgon {
 				(owner->*T_pointer) = value;
 			}
 		}
+
+		const static bool is_property_list = false;
+	};
+
+	template <typename T_name, typename T_type>
+	struct property_list {
+
+		template <typename T_language_f, typename T_owner_f, typename T_properties_f, std::size_t T_index_f>
+		friend void parse_property(token_iterator& current, const std::string& given_name, T_owner_f* owner);
+
+		using name = T_name;
+		using type = T_type;
+
+	private:
+
+		template <std::size_t T_index>
+		constexpr static bool contains_optional() {
+
+			if constexpr(is_optional<std::tuple_element_t<T_index, T_type>>::value) {
+				return true;
+			}
+
+			if constexpr(T_index + 1 < std::tuple_size_v<T_type>) {
+				return contains_optional<T_index + 1>();
+			}
+
+			return false;
+		}
+
+		const static bool is_property_list = true;
 	};
 }
 

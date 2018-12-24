@@ -31,6 +31,7 @@
 #include <memory>
 
 namespace cgon {
+
 	template <typename T> struct is_optional : std::false_type {};
 	template <typename T> struct is_optional<std::optional<T>> : std::true_type {};
 
@@ -45,6 +46,7 @@ namespace cgon {
 
 	template <typename T> struct is_unique_ptr : std::false_type {};
 	template <typename T> struct is_unique_ptr<std::unique_ptr<T>> : std::true_type {};
+	
 }
 
 #endif
