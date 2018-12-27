@@ -58,7 +58,7 @@ private:
 
 TEST(minified, main) {
 	std::unique_ptr<a> root =
-		cgon::read_file<a>("minified/minified.cgon");
+		cgon::read_file<a>("minified.cgon");
 
 	EXPECT_EQ(root->b(), 1337);
 

@@ -66,7 +66,7 @@ struct booleans : public cgon::object {
 
 TEST(primitives, numbers) {
 	std::unique_ptr<numbers> root =
-		cgon::read_file<numbers>("primitives/numbers.cgon");
+		cgon::read_file<numbers>("numbers.cgon");
 
 	EXPECT_EQ(root->a(), 1337);
 	EXPECT_EQ(root->b(), 123456789);
@@ -76,7 +76,7 @@ TEST(primitives, numbers) {
 
 TEST(primitives, booleans) {
 	std::unique_ptr<booleans> root =
-		cgon::read_file<booleans>("primitives/booleans.cgon");
+		cgon::read_file<booleans>("booleans.cgon");
 	
 	EXPECT_EQ(root->a, false);
 	EXPECT_EQ(root->b, true);

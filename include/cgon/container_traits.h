@@ -36,7 +36,7 @@ namespace cgon {
 	template <typename T> struct is_optional<std::optional<T>> : std::true_type {};
 
 	template <typename T> struct is_vector : std::false_type {};
-	template <typename T> struct is_vector<std::vector<T>> : std::true_type {};
+	template <typename T, typename T_allocator> struct is_vector<std::vector<T, T_allocator>> : std::true_type {};
 
 	template <typename T> struct is_array : std::false_type {};
 	template <typename T, std::size_t T_size> struct is_array<std::array<T, T_size>> : std::true_type {};
@@ -45,7 +45,7 @@ namespace cgon {
 	template <typename... T> struct is_tuple<std::tuple<T...>> : std::true_type {};
 
 	template <typename T> struct is_unique_ptr : std::false_type {};
-	template <typename T> struct is_unique_ptr<std::unique_ptr<T>> : std::true_type {};
+	template <typename T, typename T_deleter> struct is_unique_ptr<std::unique_ptr<T, T_deleter>> : std::true_type {};
 	
 }
 
