@@ -1,0 +1,16 @@
+lists_of_objects {
+	pairs: [
+		{
+			key: "a"
+			value: "b"
+		}
+		{
+			key: "c"
+			value: "d"
+		}
+		{
+			key: "e"
+			value: "f"
+		}
+	]
+}
