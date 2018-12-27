@@ -301,8 +301,9 @@ namespace cgon {
 				parse_delimiter<T_language>(current);
 			}
 
-			typename T::value_type value = parse_expression<T_language, typename T::value_type>(current);
-			result.push_back(value);
+			typename T::value_type element =
+				parse_expression<T_language, typename T::value_type>(current);
+			result.push_back(std::move(element));
 		}
 
 		current++; // Skip over ']'.

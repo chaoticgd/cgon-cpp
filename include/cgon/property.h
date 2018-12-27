@@ -71,11 +71,7 @@ namespace cgon {
 		}
 
 		static void set(T_owner* owner, T_type& value) {
-			if constexpr(is_unique_ptr<T_type>::value) {
-				(owner->*T_pointer).swap(value);
-			} else {
-				(owner->*T_pointer) = value;
-			}
+			(owner->*T_pointer) = std::move(value);
 		}
 
 		const static bool is_property_list = false;
