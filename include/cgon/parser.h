@@ -145,11 +145,12 @@ namespace cgon {
 				parse_property<T_language, T, typename T::properties, 0>
 					(current, property_name, result.get());
 					
-			} else if constexpr(T_language::allow_children &&
-			                    std::tuple_size_v<typename T::child_types> > 0) {
-				std::unique_ptr<object> new_child(
-					parse_object<T_language, typename T::child_types, 0>(current));
-				result->append_child(new_child);
+			} else if constexpr(T_language::allow_children) {
+			    if constexpr(std::tuple_size_v<typename T::child_types> > 0) {
+					std::unique_ptr<object> new_child(
+						parse_object<T_language, typename T::child_types, 0>(current));
+					result->append_child(new_child);
+				}
 			} else {
 				throw parse_error("Expected property", current);
 			}
@@ -389,10 +390,10 @@ namespace cgon {
 		std::string_view token_value = current->value();
 
 		bool error =
-			(*(token_value.begin()) != '\'' || *(token_value.end() - 1) != '\'');
+			(*(token_value.begin()) != '\"' || *(token_value.end() - 1) != '\"');
 
 		if constexpr(T_language::allow_single_quoted_strings) {
-			error &= (*(token_value.begin()) != '\"' || *(token_value.end() - 1) != '\"');
+			error &= (*(token_value.begin()) != '\'' || *(token_value.end() - 1) != '\'');
 		} 
 
 		if(error) {
