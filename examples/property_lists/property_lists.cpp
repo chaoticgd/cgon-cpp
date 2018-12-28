@@ -32,7 +32,7 @@ struct config_difficulty {
 
 struct config : public cgon::object {
 	config_difficulty difficulty;
-	std::tuple<int, int> window_size;
+	int window_width, window_height;
 	bool fullscreen;
 
 	using type_name = decltype("config"_cgon_s);
@@ -43,8 +43,12 @@ struct config : public cgon::object {
 			                       config, &config::difficulty>
 		>>,
 		cgon::property_list<decltype("video"_cgon_s), std::tuple<
-			cgon::pointer_property<decltype("window_size"_cgon_s), std::tuple<int, int>,
-			                       config, &config::window_size>,
+			cgon::property_list<decltype("window_size"_cgon_s), std::tuple<
+				cgon::pointer_property<decltype("width"_cgon_s), int,
+				                       config, &config::window_width>,
+				cgon::pointer_property<decltype("height"_cgon_s), int,
+				                       config, &config::window_height>
+			>>,
 			cgon::pointer_property<decltype("fullscreen"_cgon_s), bool,
 			                      config, &config::fullscreen>
 		>>
@@ -57,7 +61,7 @@ int main() {
 
 	std::cout << "Config:\n"
 	          << "\tDifficulty: "  << root->difficulty.to_string() << "\n"
-	          << "\tWindow Size: " << std::get<0>(root->window_size)
-	          << ", "              << std::get<1>(root->window_size) << "\n"
+	          << "\tWindow Size: " << root->window_width
+	          << ", "              << root->window_height << "\n"
 	          << "\tFullscreen: "  << (root->fullscreen ? "Yes" : "No") << "\n";
 }
