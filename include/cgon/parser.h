@@ -246,7 +246,7 @@ namespace cgon {
 			}
 		}
 
-		std::string property_name = (current++)->copy_value();
+		std::string property_name = parse_string<T_language>(current);
 
 		if((current++)->value() != ":") {
 			throw parse_error("Expected ':'", current - 1);
