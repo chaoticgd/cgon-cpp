@@ -146,7 +146,7 @@ namespace cgon {
 					(current, property_name, result.get());
 					
 			} else if constexpr(T_language::allow_children) {
-			    if constexpr(std::tuple_size_v<typename T::child_types> > 0) {
+				if constexpr(std::tuple_size_v<typename T::child_types> > 0) {
 					std::unique_ptr<object> new_child(
 						parse_object<T_language, typename T::child_types, 0>(current));
 					result->append_child(new_child);
