@@ -31,8 +31,10 @@
 
 namespace cgon {
 
-	template <typename T_language>
+	template <typename T_sub_type, typename T_language>
 	struct parser {
+
+		using config = T_language;
 
 		template <typename T_child_types, std::size_t T_index>
 		static std::unique_ptr<object> parse_object(token_iterator& current) {
@@ -216,7 +218,7 @@ namespace cgon {
 				(current, property_name, owner);
 
 			if constexpr(T_index + 1 < std::tuple_size_v<typename T_property_list::type>) {
-				parse_non_optional_property_list_elements<T_language, T_property_list, T_owner, T_index + 1>
+				parse_non_optional_property_list_elements<T_property_list, T_owner, T_index + 1>
 					(current, owner, property_names);
 			}
 		}

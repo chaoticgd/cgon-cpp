@@ -31,6 +31,9 @@ namespace cgon {
 			static const bool delimit_lists = true;
 		};
 	}
+
+	struct cgon_parser : public parser<cgon_parser, language::cgon> {};
+	struct json_parser : public parser<json_parser, language::json> {};
 }
 
 #endif

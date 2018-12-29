@@ -34,23 +34,23 @@
 
 namespace cgon {
 
-	template <typename T, typename T_language = language::cgon>
+	template <typename T, typename T_parser = cgon_parser>
 	std::unique_ptr<T> read_file(std::string file_path);
 
-	template <typename T, typename T_language = language::cgon>
+	template <typename T, typename T_parser = cgon_parser>
 	std::unique_ptr<T> read_string(std::string data);
 
-	template <typename T, typename T_language>
+	template <typename T, typename T_parser>
 	std::unique_ptr<T> read_file(std::string file_path) {
 		std::ifstream file(file_path);
 		std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		return read_string<T, T_language>(data);
+		return read_string<T, T_parser>(data);
 	}
 
-	template <typename T, typename T_language>
+	template <typename T, typename T_parser>
 	std::unique_ptr<T> read_string(std::string data) {
 			
-		if constexpr(T_language::allow_comments) {
+		if constexpr(T_parser::config::allow_comments) {
 			data = strip_comments(data);
 		}
 
@@ -58,17 +58,15 @@ namespace cgon {
 			
 		token_iterator current(tokens.begin(), tokens.begin(), tokens.end());
 
-		if constexpr(T_language::require_explicit_top_level_type_name) {
+		if constexpr(T_parser::config::require_explicit_top_level_type_name) {
 			if((current++)->value() != get_string<typename T::type_name>::value()) {
 				throw parse_error("Invalid root object type.", current - 1);
 			}
 		}
 
-		using language_parser = parser<T_language>;
-
 		std::unique_ptr<T> root;
 		try {
-			root.reset(language_parser::template parse_object_of_type<T>(current).release());
+			root.reset(T_parser::template parse_object_of_type<T>(current).release());
 		} catch(unexpected_end_of_file_error e) {
 			throw parse_error("Unexpected end of file", token_iterator(tokens.end() - 1, tokens.begin(), tokens.end()));
 		}

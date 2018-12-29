@@ -31,7 +31,7 @@
 namespace cgon {
 	class object : public tree_node<object> {
 		
-		template <typename T_language_f>
+		template <typename T_sub_type_f, typename T_language_f>
 		friend struct parser;
 
 	protected:

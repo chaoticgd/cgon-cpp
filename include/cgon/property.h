@@ -35,7 +35,7 @@ namespace cgon {
 	          T_type(T_owner::*T_getter)(), void(T_owner::*T_setter)(T_type value)>
 	struct property {
 
-		template <typename T_language_f>
+		template <typename T_sub_type_f, typename T_language_f>
 		friend struct parser;
 
 		using name = T_name;
@@ -58,7 +58,7 @@ namespace cgon {
 	          T_type T_owner::*T_pointer>
 	struct pointer_property {
 
-		template <typename T_language_f>
+		template <typename T_sub_type_f, typename T_language_f>
 		friend struct parser;
 
 		using name = T_name;
@@ -80,7 +80,7 @@ namespace cgon {
 	template <typename T_name, typename T_type>
 	struct property_list {
 
-		template <typename T_language_f>
+		template <typename T_sub_type_f, typename T_language_f>
 		friend struct parser;
 
 		using name = T_name;
