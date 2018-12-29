@@ -35,8 +35,8 @@ namespace cgon {
 	          T_type(T_owner::*T_getter)(), void(T_owner::*T_setter)(T_type value)>
 	struct property {
 
-		template <typename T_language_f, typename T_owner_f, typename T_properties_f, std::size_t T_index_f>
-		friend void parse_property(token_iterator& current, const std::string& given_name, T_owner_f* owner);
+		template <typename T_language_f>
+		friend struct parser;
 
 		using name = T_name;
 		using type = T_type;
@@ -58,8 +58,8 @@ namespace cgon {
 	          T_type T_owner::*T_pointer>
 	struct pointer_property {
 
-		template <typename T_language_f, typename T_owner_f, typename T_properties_f, std::size_t T_index_f>
-		friend void parse_property(token_iterator& current, const std::string& given_name, T_owner_f* owner);
+		template <typename T_language_f>
+		friend struct parser;
 
 		using name = T_name;
 		using type = T_type;
@@ -80,8 +80,8 @@ namespace cgon {
 	template <typename T_name, typename T_type>
 	struct property_list {
 
-		template <typename T_language_f, typename T_owner_f, typename T_properties_f, std::size_t T_index_f>
-		friend void parse_property(token_iterator& current, const std::string& given_name, T_owner_f* owner);
+		template <typename T_language_f>
+		friend struct parser;
 
 		using name = T_name;
 		using type = T_type;
