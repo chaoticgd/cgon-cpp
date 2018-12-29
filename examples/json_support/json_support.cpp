@@ -40,7 +40,7 @@ struct root_object { // get_name / set_name not required for JSON objects.
 
 int main() {
 	std::unique_ptr<root_object> root =
-		cgon::read_file<root_object, cgon::language::json>("json_support.json");
+		cgon::read_file<root_object, cgon::json_parser>("json_support.json");
 
 	std::cout << root->name << "\n" << root->date_of_birth->to_string() << "\n";
 
