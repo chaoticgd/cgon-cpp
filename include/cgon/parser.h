@@ -45,10 +45,10 @@ namespace cgon {
 
 				if(current->value() == get_string<typename child_type::type_name>::value()) {
 					current++; // Skip over type name.
-					return parse_object_of_type<child_type>(current);
+					return T_sub_type::template parse_object_of_type<child_type>(current);
 				}
 
-				return parse_object<T_child_types, T_index + 1>(current);
+				return T_sub_type::template parse_object<T_child_types, T_index + 1>(current);
 			}
 
 			throw parse_error("Invalid type name", current);
@@ -84,30 +84,30 @@ namespace cgon {
 
 				if constexpr(T_language::delimit_lists) {
 					if(property_names.size() > 0) {
-						parse_delimiter(current);
+						T_sub_type::parse_delimiter(current);
 					}
 				}
 
 				if((current + 1)->value() == ":") {
 					std::string property_name = current->copy_value();
 					if constexpr(T_language::quoted_property_names) {
-						property_name = parse_string(current);
+						property_name = T_sub_type::parse_string(current);
 					} else {
 						current++;
 					}
 
-					validate_property_uniqueness(current, property_names, property_name);
+					T_sub_type::validate_property_uniqueness(current, property_names, property_name);
 					property_names.push_back(property_name);
 
 					current++; // Skip over ':'.
 
-					parse_property<T, typename T::properties, 0>
+					T_sub_type::template parse_property<T, typename T::properties, 0>
 						(current, property_name, result.get());
 						
 				} else if constexpr(T_language::allow_children) {
 					if constexpr(std::tuple_size_v<typename T::child_types> > 0) {
 						std::unique_ptr<object> new_child(
-							parse_object<typename T::child_types, 0>(current));
+							T_sub_type::template parse_object<typename T::child_types, 0>(current));
 						result->append_child(new_child);
 					}
 				} else {
@@ -115,7 +115,8 @@ namespace cgon {
 				}
 			}
 
-			validate_properties_are_initialised<typename T::properties, 0>(current, property_names);
+			T_sub_type::template validate_properties_are_initialised<typename T::properties, 0>
+				(current, property_names);
 
 			current++; // Skip over '}'.
 
@@ -135,18 +136,18 @@ namespace cgon {
 						if constexpr(property::template contains_optional<0>()) {
 							throw parse_error("std::optional not yet implemented for property lists", current);
 						} else {
-							parse_non_optional_property_list<property, T_owner>(current, owner);
+							T_sub_type::template parse_non_optional_property_list<property, T_owner>(current, owner);
 						}
 					} else {
 						typename property::type value =
-							parse_expression<typename property::type>(current);
+							T_sub_type::template parse_expression<typename property::type>(current);
 						property::set(owner, value);
 					}
 
 					return;
 				}
 
-				parse_property<T_owner, T_properties, T_index + 1>(current, given_name, owner);
+				T_sub_type::template parse_property<T_owner, T_properties, T_index + 1>(current, given_name, owner);
 				return;
 			}
 
@@ -176,7 +177,7 @@ namespace cgon {
 					throw parse_error(std::string("Property '") + property_name + "' has not been defined", current);
 				}
 
-				validate_properties_are_initialised<T_properties, T_index + 1>(current, property_names);
+				T_sub_type::template validate_properties_are_initialised<T_properties, T_index + 1>(current, property_names);
 			}
 		}
 
@@ -188,7 +189,7 @@ namespace cgon {
 			}
 
 			std::vector<std::string> property_names;
-			parse_non_optional_property_list_elements<T_property_list, T_owner, 0>
+			T_sub_type::template parse_non_optional_property_list_elements<T_property_list, T_owner, 0>
 				(current, owner, property_names);
 			
 			if((current++)->value() != "}") {
@@ -201,24 +202,24 @@ namespace cgon {
 
 			if constexpr(T_language::delimit_lists) {
 				if(property_names.size() > 0) {
-					parse_delimiter(current);
+					T_sub_type::parse_delimiter(current);
 				}
 			}
 
-			std::string property_name = parse_string(current);
+			std::string property_name = T_sub_type::parse_string(current);
 
 			if((current++)->value() != ":") {
 				throw parse_error("Expected ':'", current - 1);
 			}
 
-			validate_property_uniqueness(current, property_names, property_name);
+			T_sub_type::validate_property_uniqueness(current, property_names, property_name);
 			property_names.push_back(property_name);
 
-			parse_property<T_owner, typename T_property_list::type, 0>
+			T_sub_type::template parse_property<T_owner, typename T_property_list::type, 0>
 				(current, property_name, owner);
 
 			if constexpr(T_index + 1 < std::tuple_size_v<typename T_property_list::type>) {
-				parse_non_optional_property_list_elements<T_property_list, T_owner, T_index + 1>
+				T_sub_type::template parse_non_optional_property_list_elements<T_property_list, T_owner, T_index + 1>
 					(current, owner, property_names);
 			}
 		}
@@ -227,21 +228,21 @@ namespace cgon {
 		static T parse_expression(token_iterator& current) {
 			
 			if constexpr(is_optional<T>::value) {
-				return parse_expression<typename T::value_type>(current);
+				return T_sub_type::template parse_expression<typename T::value_type>(current);
 			} else if constexpr(is_vector<T>::value) {
-				return parse_vector<T>(current);
+				return T_sub_type::template parse_vector<T>(current);
 			} else if constexpr(is_array<T>::value) {
-				return parse_array<T>(current);
+				return T_sub_type::template parse_array<T>(current);
 			} else if constexpr(is_tuple<T>::value) {
-				return parse_tuple<T>(current);
+				return T_sub_type::template parse_tuple<T>(current);
 			} else if constexpr(std::is_same<T, bool>()) {
-				return parse_bool(current);
+				return T_sub_type::parse_bool(current);
 			} else if constexpr(std::is_integral<T>() || std::is_floating_point<T>()) {
-				return parse_arithmetic_expression<T>(current);
+				return T_sub_type::template parse_arithmetic_expression<T>(current);
 			} else if constexpr(std::is_same<T, std::string>()) {
-				return parse_string(current);
+				return T_sub_type::parse_string(current);
 			} else if constexpr(is_unique_ptr<T>::value) {
-				return parse_object_of_type<typename T::element_type>(current);
+				return T_sub_type::template parse_object_of_type<typename T::element_type>(current);
 			} else {
 				return T(current);
 			}
@@ -257,11 +258,11 @@ namespace cgon {
 			while(current->value() != "]") {
 
 				if(result.size() != 0) {
-					parse_delimiter(current);
+					T_sub_type::parse_delimiter(current);
 				}
 
 				typename T::value_type element =
-					parse_expression<typename T::value_type>(current);
+					T_sub_type::template parse_expression<typename T::value_type>(current);
 				result.push_back(std::move(element));
 			}
 
@@ -281,11 +282,11 @@ namespace cgon {
 			for(typename T::value_type& element : result) {
 
 				if(first_element) {
-					parse_delimiter(current);
+					T_sub_type::parse_delimiter(current);
 					first_element = false;
 				}
 
-				element = parse_expression<typename T::value_type>(current);
+				element = T_sub_type::template parse_expression<typename T::value_type>(current);
 			}
 
 			if((current++)->value() != "]") {
@@ -302,7 +303,7 @@ namespace cgon {
 			}
 
 			T result;
-			parse_tuple_elements<T, 0>(current, result);
+			T_sub_type::template parse_tuple_elements<T, 0>(current, result);
 
 			if((current++)->value() != ")") {
 				throw parse_error("Expected ')'", current - 1);
@@ -317,10 +318,10 @@ namespace cgon {
 			using element_type = std::tuple_element_t<T_index, T_tuple>;
 
 			std::get<T_index>(tuple) =
-				parse_expression<element_type>(current);
+				T_sub_type::template parse_expression<element_type>(current);
 
 			if constexpr(T_index + 1 < std::tuple_size_v<T_tuple>) {
-				parse_tuple_elements<T_tuple, T_index + 1>(current, tuple);
+				T_sub_type::template parse_tuple_elements<T_tuple, T_index + 1>(current, tuple);
 			}
 
 		}
