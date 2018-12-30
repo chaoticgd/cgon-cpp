@@ -33,7 +33,7 @@
 namespace cgon {
 	class token {
 	public:
-		token(std::string_view value, std::size_t offset, std::string_view text)
+		token(std::string_view value, std::string_view text, std::size_t offset)
 			: _value(value), _text(text), _offset(offset) {}
 
 		std::string_view value() const { return _value; }

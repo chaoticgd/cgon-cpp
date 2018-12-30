@@ -37,52 +37,58 @@
 
 namespace cgon {
 
-	static std::vector<token> tokenize(std::string_view text);
-	static std::tuple<std::string_view, std::string_view> consume(std::string_view text);
+	template <typename T_language>
+	std::vector<token> tokenize(std::string_view text);
 
 	static bool is_symbol(char c);
 	static std::string_view::iterator find_end_of_string(std::string_view text);
 
+	template <typename T_language>
 	std::vector<token> tokenize(std::string_view text) {
-		std::string_view current = text;
-
 		std::vector<token> tokens;
+		std::string_view current = text;
 
 		while(current.size() > 0) {
 
 			// Remove unnecessary whitespace.
 			if(isspace(current[0])) {
-				auto new_position = std::find_if_not(current.begin(), current.end(), isspace);
-				current.remove_prefix(std::distance(current.begin(), new_position));
+				current.remove_prefix(1);
 				continue;
 			}
 
-			const auto [ value, rest ] = consume(current);
-			current = rest;
+			if constexpr(T_language::allow_comments) {
+				if(current.size() >= 2 && current[0] == '/') {
+					if(current[1] == '*') {
+						current.remove_prefix(current.find("*/") + 2);
+						continue;
+					} else if(current[1] == '/') {
+						current.remove_prefix(current.find("\n") + 1);
+						continue;
+					}
+				}
+			}
 
-			tokens.emplace_back(value, text.size() - current.size(), text);
+			char first = current[0];
+			bool is_string = first == '\'' || first == '\"';
+			
+			std::string_view::iterator delimeter;
+			if(is_string) {
+				delimeter = find_end_of_string(current);
+			} else if(is_symbol(first)) {
+				delimeter = current.begin() + 1;
+			} else {
+				delimeter = std::find_if(current.begin(), current.end(), is_symbol);
+			}
+
+			size_t size = std::distance(current.begin(), delimeter);
+
+			std::string_view value = current.substr(0, size);
+			current.remove_prefix(size);
+
+			tokens.emplace_back(value, text, text.size() - current.size());
 		}
 
 		return tokens;
-	}
-
-	std::tuple<std::string_view, std::string_view> consume(std::string_view text) {
-
-		char first = text[0];
-		bool is_string = first == '\'' || first == '\"';
-		
-		std::string_view::iterator delimeter;
-		if(is_string) {
-			delimeter = find_end_of_string(text);
-		} else if(is_symbol(first)) {
-			delimeter = text.begin() + 1;
-		} else {
-			delimeter = std::find_if(text.begin(), text.end(), is_symbol);
-		}
-
-		size_t size = std::distance(text.begin(), delimeter);
-
-		return { text.substr(0, size), text.substr(size) };
 	}
 
 	bool is_symbol(char c) {

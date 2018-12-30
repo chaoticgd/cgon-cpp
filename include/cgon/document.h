@@ -49,13 +49,9 @@ namespace cgon {
 
 	template <typename T, typename T_parser>
 	std::unique_ptr<T> read_string(std::string data) {
-			
-		if constexpr(T_parser::config::allow_comments) {
-			data = strip_comments(data);
-		}
+		
+		std::vector<token> tokens = tokenize<typename T_parser::config>(data);
 
-		std::vector<token> tokens = tokenize(data);
-			
 		token_iterator current(tokens.begin(), tokens.begin(), tokens.end());
 
 		if constexpr(T_parser::config::require_explicit_top_level_type_name) {
