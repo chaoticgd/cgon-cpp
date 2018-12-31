@@ -33,7 +33,7 @@ std::vector<std::string> extract_token_values(std::vector<cgon::token> tokens) {
 
 TEST(lexer, main) {
 	std::string text = "lorem{ ip: \"sum\" test {one: 2 three: 4} }";
-	std::vector<cgon::token> tokens = cgon::tokenize(text);
+	std::vector<cgon::token> tokens = cgon::tokenize<cgon::language::cgon>(text);
 	std::vector<std::string> token_values = extract_token_values(tokens);
 	std::vector<std::string> expected_values = { "lorem", "{", "ip", ":", "\"sum\"", "test", "{", "one", ":", "2", "three", ":", "4", "}", "}" };
 	EXPECT_EQ(token_values, expected_values);
