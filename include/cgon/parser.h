@@ -61,21 +61,16 @@ namespace cgon {
 
 			if((current++)->value() != "{") {
 
-				bool error = false;
-
 				if constexpr(T_language::allow_named_objects) {
 					result->set_name((current - 1)->copy_value());
 
 					if((current++)->value() != "{") {
-						error = true;
+						return result;
 					}
 				} else {
-					error = true;
-				}
-
-				if(error) {
 					throw parse_error("Expected '{'", current - 1);
 				}
+
 			}
 
 			std::vector<std::string> property_names;

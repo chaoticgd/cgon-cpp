@@ -87,12 +87,12 @@ namespace cgon {
 
 			tokens.emplace_back(value, text, text.size() - current.size());
 		}
-
+		
 		return tokens;
 	}
 
 	bool is_symbol(char c) {
-		const static std::string symbols = "{}[]():\"',"; // Todo: Fix for JSON.
+		const static std::string symbols = "{}[]():;\"',"; // Todo: Fix for JSON.
 		return std::find(symbols.begin(), symbols.end(), c) != symbols.end() || isspace(c);
 	}
 
