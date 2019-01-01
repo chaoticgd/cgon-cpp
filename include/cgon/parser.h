@@ -151,7 +151,7 @@ namespace cgon {
 				return;
 			}
 
-			throw parse_error("Invalid property name", current);
+			throw parse_error("Invalid property name", current - 2);
 		}
 
 		static void validate_property_uniqueness(token_iterator& current, const std::vector<std::string>& property_names, const std::string& name) {
