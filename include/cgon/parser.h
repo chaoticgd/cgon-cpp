@@ -51,7 +51,7 @@ namespace cgon {
 				return T_sub_type::template parse_object<T_child_types, T_index + 1>(current);
 			}
 
-			throw parse_error("Invalid type name", current);
+			return T_sub_type::parse_object_of_unknown_type(current);
 		}
 
 		template <typename T>
@@ -116,6 +116,10 @@ namespace cgon {
 			current++; // Skip over '}'.
 
 			return result;
+		}
+
+		static std::unique_ptr<object> parse_object_of_unknown_type(token_iterator& current) {
+			throw parse_error("Invalid type name", current);
 		}
 
 		template <typename T_owner, typename T_properties, std::size_t T_index>
