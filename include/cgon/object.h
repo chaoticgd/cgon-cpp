@@ -34,6 +34,18 @@ namespace cgon {
 		template <typename T_sub_type_f, typename T_language_f>
 		friend struct parser;
 
+	public:
+		template <typename T_child>
+		T_child* find_child_of_type(std::string name) {
+			for(T_child* child : children_of_type<T_child>()) {
+				if(child->get_name() == name) {
+					return child;
+				}
+			}
+
+			throw std::out_of_range(std::string("No child of the correct type exists with name '") + name + "'");
+		}
+
 	protected:
 		std::string get_name() const {
 			return _name;
