@@ -150,7 +150,20 @@ namespace cgon {
 				return;
 			}
 
-			throw parse_error("Invalid property name", current - 2);
+			std::string owner_type_name = get_string<typename T_owner::type_name>::value();
+			if constexpr(T_language::allow_named_objects) {
+				std::string owner_name = owner->get_name();
+				if(owner_name == "") {
+					owner_name = "(anonymous)";
+				}
+				throw parse_error(
+					std::string("Invalid property name '") + given_name +
+					"' for object '" + owner_type_name + " " + owner_name + "'", current - 2);
+			} else {
+				throw parse_error(
+					std::string("Invalid property name '") + given_name +
+					"' for object of type '" + owner_type_name + "'", current - 2);
+			}
 		}
 
 		static void validate_property_uniqueness(token_iterator& current, const std::vector<std::string>& property_names, const std::string& name) {
