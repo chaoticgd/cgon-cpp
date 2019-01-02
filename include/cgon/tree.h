@@ -32,7 +32,8 @@ namespace cgon {
 	class tree_node
 	{
 	protected:
-		tree_node() {}
+		tree_node()
+			: _parent(nullptr) {}
 		virtual ~tree_node() {}
 
 	public:
@@ -60,6 +61,7 @@ namespace cgon {
 		template <typename T_child, typename... T_constructor_args>
 		T* create_child(T_constructor_args... args) {
 			auto child = std::make_unique<T_child>(args...);
+			child->_parent = static_cast<T*>(this);
 			return append_child(child);
 		}
 
@@ -68,6 +70,7 @@ namespace cgon {
 		}
 
 		T* insert_child(std::unique_ptr<T>& child, size_t position) {
+			child->_parent = static_cast<T*>(this);
 			T* raw = child.get();
 			_children.insert(_children.begin() + position, std::move(child));
 			return raw;
@@ -77,12 +80,30 @@ namespace cgon {
 			auto iter = std::find_if(_children.begin(), _children.end(),
 				[=](std::unique_ptr<T>& current) { return current.get() == child; });
 			std::unique_ptr<T> orphaned_child = std::move(*iter);
+			orphaned_child->_parent = nullptr;
 			_children.erase(iter);
 			return orphaned_child;
 		}
 
+		T* parent() {
+			_parent;
+		}
+
+		bool has_parent() {
+			return _parent != nullptr;
+		}
+
+		T* root() {
+			T* current = static_cast<T*>(this);
+			while(current->has_parent()) {
+				current = current->_parent;
+			}
+			return current;
+		}
+
 	private:
 		std::vector<std::unique_ptr<T>> _children;
+		T* _parent;
 	};
 }
 
