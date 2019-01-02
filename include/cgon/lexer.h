@@ -92,7 +92,7 @@ namespace cgon {
 	}
 
 	bool is_symbol(char c) {
-		const static std::string symbols = "{}[]():;\"',"; // Todo: Fix for JSON.
+		const static std::string symbols = "{}[]():\"',"; // Todo: Fix for JSON.
 		return std::find(symbols.begin(), symbols.end(), c) != symbols.end() || isspace(c);
 	}
 
