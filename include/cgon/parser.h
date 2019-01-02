@@ -64,8 +64,10 @@ namespace cgon {
 				if constexpr(T_language::allow_named_objects) {
 					result->set_name((current - 1)->copy_value());
 
-					if((current++)->value() != "{") {
+					if(current->value() != "{") {
 						return result;
+					} else {
+						current++;
 					}
 				} else {
 					throw parse_error("Expected '{'", current - 1);
