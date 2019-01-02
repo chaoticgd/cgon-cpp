@@ -41,7 +41,9 @@ namespace cgon {
 
 	template <typename T, typename T_parser>
 	std::unique_ptr<T> read_file(std::string file_path) {
-		std::ifstream file(file_path);
+		std::ifstream file;
+		file.exceptions(std::ifstream::badbit | std::ifstream::failbit | std::ifstream::eofbit);
+		file.open(file_path, std::ifstream::in);
 		std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 		return read_string<T, T_parser>(data);
 	}
