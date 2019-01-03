@@ -6,7 +6,8 @@ struct config_difficulty {
 
 	config_difficulty() {}
 
-	config_difficulty(cgon::token_iterator& current) {
+	template <typename T_parser>
+	void parse(cgon::token_iterator& current) {
 		std::string_view value_str = (current++)->value();
 		if(value_str == "EASY") {
 			value = EASY;

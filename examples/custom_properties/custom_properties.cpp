@@ -5,7 +5,8 @@ struct transaction_id {
 
 	transaction_id() : start({' ', ' '}), end(0) {}
 
-	transaction_id(cgon::token_iterator& current) {
+	template <typename T_parser>
+	void parse(cgon::token_iterator& current) {
 		std::string value = (current++)->copy_value();
 		
 		if(value.size() != 7 || value[2] != '-') {
@@ -33,7 +34,8 @@ struct transaction_price {
 
 	transaction_price() : value(0), currency(transaction_currency::BTC) {}
 
-	transaction_price(cgon::token_iterator& current) {
+	template <typename T_parser>
+	void parse(cgon::token_iterator& current) {
 		std::string value_str = (current++)->copy_value();
 		std::string_view currency_str = (current++)->value();
 
@@ -73,7 +75,8 @@ struct iso8601_date {
 
 	iso8601_date() : year(0), month(0), day(0) {}
 
-	iso8601_date(cgon::token_iterator& current) {
+	template <typename T_parser>
+	void parse(cgon::token_iterator& current) {
 		std::string value = (current++)->copy_value();
 		year = std::stoi(value.substr(0, 4));
 		month = std::stoi(value.substr(5, 7));

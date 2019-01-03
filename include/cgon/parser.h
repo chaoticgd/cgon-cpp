@@ -258,7 +258,9 @@ namespace cgon {
 			} else if constexpr(is_unique_ptr<T>::value) {
 				return T_sub_type::template parse_object_of_type<typename T::element_type>(current);
 			} else {
-				return T(current);
+				T object;
+				object.template parse<T_sub_type>(current);
+				return object;
 			}
 		}
 
