@@ -152,19 +152,23 @@ namespace cgon {
 				return;
 			}
 
-			std::string owner_type_name = get_string<typename T_owner::type_name>::value();
-			if constexpr(T_language::allow_named_objects) {
-				std::string owner_name = owner->get_name();
-				if(owner_name == "") {
-					owner_name = "(anonymous)";
+			if constexpr(T_language::require_explicit_top_level_type_name) {
+				std::string owner_type_name = get_string<typename T_owner::type_name>::value();
+				if constexpr(T_language::allow_named_objects) {
+					std::string owner_name = owner->get_name();
+					if(owner_name == "") {
+						owner_name = "(anonymous)";
+					}
+					throw parse_error(
+						std::string("Invalid property name '") + given_name +
+						"' for object '" + owner_type_name + " " + owner_name + "'", current - 2);
+				} else {
+					throw parse_error(
+						std::string("Invalid property name '") + given_name +
+						"' for object of type '" + owner_type_name + "'", current - 2);
 				}
-				throw parse_error(
-					std::string("Invalid property name '") + given_name +
-					"' for object '" + owner_type_name + " " + owner_name + "'", current - 2);
 			} else {
-				throw parse_error(
-					std::string("Invalid property name '") + given_name +
-					"' for object of type '" + owner_type_name + "'", current - 2);
+				throw parse_error("Invalid property name.", current - 2);
 			}
 		}
 
