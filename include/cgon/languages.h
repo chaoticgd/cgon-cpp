@@ -32,8 +32,21 @@ namespace cgon {
 		};
 	}
 
-	struct cgon_parser : public parser<cgon_parser, language::cgon> {};
-	struct json_parser : public parser<json_parser, language::json> {};
+	template <typename T_sub_type>
+	struct cgon_parser_base : public parser<T_sub_type, language::cgon> {};
+
+	template <typename T_sub_type>
+	struct json_parser_base : public parser<T_sub_type, language::json> {};
+
+	struct cgon_parser : public cgon_parser_base<cgon_parser> {
+		template <typename T_sub_type>
+		using base = cgon_parser_base<T_sub_type>;
+	};
+
+	struct json_parser : public json_parser_base<json_parser> {
+		template <typename T_sub_type>
+		using base = json_parser_base<T_sub_type>;
+	};
 }
 
 #endif
