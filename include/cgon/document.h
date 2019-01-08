@@ -63,7 +63,8 @@ namespace cgon {
 
 		std::unique_ptr<T> root;
 		try {
-			root.reset(T_parser::template parse_object_of_type<T>(current).release());
+			T_parser parser;
+			root.reset(parser.template parse_object_of_type<T>(current).release());
 		} catch(unexpected_end_of_file_error e) {
 			throw parse_error("Unexpected end of file", token_iterator(tokens.end() - 1, tokens.begin(), tokens.end()));
 		}
