@@ -46,11 +46,11 @@ namespace cgon {
 			throw std::out_of_range(std::string("No child of the correct type exists with name '") + name + "'");
 		}
 
-	protected:
 		std::string get_name() const {
 			return _name;
 		}
 
+	protected:
 		void set_name(std::string name) {
 			_name = name;
 		}
