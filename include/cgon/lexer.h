@@ -83,9 +83,8 @@ namespace cgon {
 			size_t size = std::distance(current.begin(), delimeter);
 
 			std::string_view value = current.substr(0, size);
-			current.remove_prefix(size);
-
 			tokens.emplace_back(value, text, text.size() - current.size());
+			current.remove_prefix(size);
 		}
 		
 		return tokens;
