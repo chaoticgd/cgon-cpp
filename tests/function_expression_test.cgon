@@ -1,0 +1,4 @@
+function_expression_test {
+	value1: add(32 subtract(100 90)) // Should be 42.
+	value2: subtract(add(3000 subtract(add(600 64) 1)) 1000) // Should be 1337.
+}

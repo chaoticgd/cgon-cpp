@@ -36,9 +36,17 @@ namespace cgon {
 		token(std::string_view value, std::string_view text, std::size_t offset)
 			: _value(value), _text(text), _offset(offset) {}
 
+		token(token& other, std::string_view text, std::size_t starting_offset)
+			: _value(text.substr(other.offset() - starting_offset, other.value().size())),
+			  _text(text),
+			  _offset(other._offset - starting_offset) {}
+
 		std::string_view value() const { return _value; }
 		std::string copy_value() const { return static_cast<std::string>(_value); }
 		
+		std::string_view whole_text() { return _text; }
+		std::size_t offset() { return _offset; }
+
 		int line() const {
 			int line = 0;
 			for(std::size_t i = 0; i < _offset - _value.size(); i++) {
